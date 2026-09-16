@@ -582,6 +582,9 @@ ${footer(l,'../..')}
 </body></html>`;
 }
 
+/* L'atelier de design (assets/js/da.js) n'est plus chargé : le README demande
+   de le retirer avant mise en ligne. Pour le réactiver en local, ajouter une
+   balise script pointant vers ../assets/js/da.js juste avant </body>. */
 function page(l){
   const o = { title: l==='fr'
       ? 'SMA-RTY France · Caméras multispectrales et calcul embarqué'
@@ -623,7 +626,6 @@ ${qualifier(l)}
 ${footer(l,'..')}
 <script>window.__B=${JSON.stringify(boot)};</script>
 <script src="${A('../assets/js/main.js')}" defer></script>
-<script src="${A('../assets/js/da.js')}" defer></script>
 </body></html>`;
 }
 
