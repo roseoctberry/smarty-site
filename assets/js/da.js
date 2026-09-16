@@ -165,7 +165,7 @@ direction:var(--heroDirD,ltr)}\
 .da{position:fixed;right:0;top:0;bottom:0;width:346px;z-index:9999;overflow:auto;\
 background:rgba(9,11,14,.975);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);\
 border-left:1px solid rgba(255,255,255,.2);padding:0 0 40px;\
-font:400 12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#BFC7D0}\
+font:400 12px/1.5 europa,'Avenir Next',Avenir,'Segoe UI',system-ui,sans-serif;color:#BFC7D0}\
 .da-hd{position:sticky;top:0;z-index:2;background:rgba(9,11,14,.99);padding:16px 16px 0}\
 .da-hd-t{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:12px}\
 .da-hd-t b{font-weight:400;letter-spacing:.2em;text-transform:uppercase;font-size:10px;color:#F2F5F8}\
@@ -204,7 +204,7 @@ font:400 10px/1 inherit;letter-spacing:.18em;text-transform:uppercase}\
 .da-b--g:hover{background:rgba(255,255,255,.1);color:#fff}\
 .da-out{margin:10px 16px 0;width:calc(100% - 32px);height:170px;background:#07080A;color:#BFC7D0;\
 border:1px solid rgba(255,255,255,.16);padding:10px;font:400 10px/1.5 inherit;resize:vertical;display:none}\
-.da-hint{position:fixed;right:14px;bottom:14px;z-index:9998;font:400 10px/1 ui-monospace,monospace;\
+.da-hint{position:fixed;right:14px;bottom:14px;z-index:9998;font:400 10px/1 europa,'Avenir Next',Avenir,'Segoe UI',system-ui,sans-serif;\
 letter-spacing:.18em;text-transform:uppercase;color:#535C66;background:rgba(9,11,14,.88);\
 border:1px solid rgba(255,255,255,.14);padding:8px 10px;cursor:pointer}\
 .da-hint:hover{color:#F2F5F8;border-color:#5FBDBE}\

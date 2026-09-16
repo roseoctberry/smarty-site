@@ -10,15 +10,16 @@ const site = {
   siren: '845 146 935',
   /* Adobe Fonts — kit « Europa ». */
   typekit: 'wst3qpr',
-  lieu: { fr: 'Institut Pascal — Aubière (63)', en: 'Institut Pascal — Aubière, France' },
+  lieu: { fr: 'Institut Pascal, Aubière (63)', en: 'Institut Pascal, Aubière, France' },
   cree: 2019,
   adresse: ['4 avenue Blaise Pascal', '63178 Aubière', 'France'],
   siret: '845 146 935 00018',
   tva: 'FR12 845 146 935',
   mail: 'info@sma-rty.com',
+  support: 'support@sma-rty.com',
   /* ⚠ non publié sur sma-rty.com — à renseigner avant mise en ligne. */
   tel: '',
-  groupe: { it: 'SMA-RTY Italia SRL — Cologno Monzese (Milan), Vimodrone (Milan), La Spezia' },
+  groupe: { it: 'SMA-RTY Italia SRL : Cologno Monzese (Milan), Vimodrone (Milan), La Spezia' },
 };
 
 /* ---------- Menu ---------- */
@@ -26,7 +27,7 @@ const NAV = [
   { id:'capacites', n:{fr:'Capacités',en:'Capabilities'},
     d:{fr:'Relevés comparatifs par bande.',en:'Comparative captures by band.'} },
   { id:'instruments', n:{fr:'Instruments',en:'Instruments'},
-    d:{fr:'KALIX, FONIX, Metacamera, calcul embarqué.',en:'KALIX, FONIX, Metacamera, embedded compute.'} },
+    d:{fr:'THR-LW, FNX-SWIR, Metacamera, calcul embarqué.',en:'THR-LW, FNX-SWIR, Metacamera, embedded compute.'} },
   { id:'integration', n:{fr:'Intégration',en:'Integration'},
     d:{fr:'Architecture de l’instrument et paramètres ajustables.',en:'Instrument architecture and adjustable parameters.'} },
   { id:'secteurs', n:{fr:'Domaines d’emploi',en:'Fields of use'},
@@ -48,8 +49,8 @@ const POC = [
     start:'ir',
     where:{fr:'Trois heures après le coucher du soleil, sans lune. Routes, cours d’eau et bâti gardent assez de contraste thermique pour servir d’amers de recalage.',
            en:'Three hours after sunset, no moon. Roads, waterways and buildings keep enough thermal contrast to serve as re-localization landmarks.'},
-    metric:{fr:'NETD à confirmer · 150 m sol',en:'NETD TBC · 150 m AGL'},
-    gear:{fr:'KALIX + calcul embarqué',en:'KALIX + embedded compute'} },
+    metric:{fr:'NETD < 60 mK · 150 m sol',en:'NETD < 60 mK · 150 m AGL'},
+    gear:{fr:'THR-LW + calcul embarqué',en:'THR-LW + embedded compute'} },
 
   { id:'fumee', k:{fr:'OBSCURCISSANT',en:'OBSCURANT'},
     label:{fr:'Fumée sèche traversée',en:'Dry smoke penetrated'},
@@ -60,7 +61,7 @@ const POC = [
     where:{fr:'Les suies diffusent dans le visible et restent transparentes à 8–14 µm. La voie, le véhicule et la clôture réapparaissent là où l’image visible sature.',
            en:'Soot scatters in the visible and stays transparent at 8–14 µm. Lane, vehicle and fence reappear where the visible image saturates.'},
     metric:{fr:'Portée à travers l’obscurcissant à mesurer',en:'Range through obscurant TBC'},
-    gear:{fr:'KALIX',en:'KALIX'} },
+    gear:{fr:'THR-LW',en:'THR-LW'} },
 
   { id:'verglas', k:{fr:'ÉTAT DE SURFACE',en:'SURFACE STATE'},
     label:{fr:'Eau et glace séparées',en:'Water and ice separated'},
@@ -71,7 +72,7 @@ const POC = [
     where:{fr:'L’eau absorbe fortement au-delà de 1,4 µm. Une aire qui paraît uniformément humide rend en SWIR la carte réelle de l’eau retenue.',
            en:'Water absorbs strongly beyond 1.4 µm. A surface that looks uniformly damp yields in SWIR the real map of standing water.'},
     metric:{fr:'Résolution au sol à mesurer',en:'Ground resolution TBC'},
-    gear:{fr:'FONIX sur porteur véhicule',en:'FONIX, vehicle-mounted'} },
+    gear:{fr:'FNX-SWIR sur porteur véhicule',en:'FNX-SWIR, vehicle-mounted'} },
 
   { id:'spot', k:{fr:'DÉSIGNATION',en:'DESIGNATION'},
     label:{fr:'Marquage à 1,06 et 1,55 µm',en:'Marking at 1.06 and 1.55 µm'},
@@ -81,8 +82,149 @@ const POC = [
     where:{fr:'Un spot de désignation ne dépose pas d’énergie thermique exploitable : la bande 8–14 µm ne le restitue pas. La bande 0,9–1,7 µm couvre les deux longueurs d’onde usuelles.',
            en:'A designation spot deposits no usable thermal energy: the 8–14 µm band does not render it. The 0.9–1.7 µm band covers both standard wavelengths.'},
     metric:{fr:'Scène à 300 m · dynamique intra-image à mesurer',en:'Scene at 300 m · intra-frame dynamic range TBC'},
-    gear:{fr:'FONIX',en:'FONIX'} },
+    gear:{fr:'FNX-SWIR',en:'FNX-SWIR'} },
 ];
+
+/* ---------- Hero : suite d'images plein écran ----------
+   Ordre d'apparition au défilement horizontal. Chaque entrée pointe une
+   bande déjà décrite dans POC : pas de duplication d'image ni de libellé. */
+const HEROSEQ = [
+  { poc:'fumee',   layer:'vis' },
+  { poc:'fumee',   layer:'fus' },
+  { poc:'verglas', layer:'vis' },
+  { poc:'verglas', layer:'fus' },
+];
+
+/* ---------- Spécifications publiées ----------
+   Grandeurs reprises du catalogue constructeur, telles que publiées.
+   `c` = condition de mesure, uniquement quand la source en énonce une.
+   METACAMERA n'y figure pas : aucune grandeur publiée. */
+const SPECS = {
+  h:{fr:'Grandeurs publiées',en:'Published figures'},
+  p:{fr:'Aucune valeur n’est extrapolée : une grandeur absente du catalogue est absente d’ici.',
+     en:'No value is extrapolated: a figure absent from the catalogue is absent here.'},
+  cols:{fr:['Grandeur','Valeur'],en:['Quantity','Value']},
+  units:[
+    { id:'thr-lw', n:'THR-LW Thermal',
+      rows:[
+        { k:{fr:'Type de capteur',en:'Sensor type'},   v:{fr:'Microbolomètre 12 µm, sans obturateur',en:'12 µm microbolometer, shutterless'} },
+        { k:{fr:'Résolution',en:'Resolution'},          v:{fr:'640 × 480 (VGA)',en:'640 × 480 (VGA)'} },
+        { k:{fr:'Sensibilité',en:'Sensitivity'},        v:{fr:'< 60 mK',en:'< 60 mK'} },
+        { k:{fr:'Fréquence',en:'Frame rate'},           v:{fr:'jusqu’à 60 Hz',en:'up to 60 Hz'} },
+        { k:{fr:'Profondeur de flux',en:'Stream depth'},v:{fr:'14 bits',en:'14-bit'} },
+        { k:{fr:'Traitement',en:'Processing'},          v:{fr:'FPGA temps réel (NUC, BPC, AGC)',en:'Real-time FPGA (NUC, BPC, AGC)'} },
+        { k:{fr:'Refroidissement',en:'Cooling'},        v:{fr:'non refroidi, correction active',en:'uncooled, active correction'} },
+        { k:{fr:'Interface',en:'Interface'},            v:{fr:'USB 3.1 Type-C / MIPI CSI-2',en:'USB 3.1 Type-C / MIPI CSI-2'} },
+        { k:{fr:'Protocole',en:'Protocol'},             v:{fr:'USB-UVC',en:'USB-UVC'} },
+        { k:{fr:'Dimensions',en:'Dimensions'},          v:{fr:'55 × 55 × 40 mm',en:'55 × 55 × 40 mm'} },
+        { k:{fr:'Alimentation',en:'Power'},             v:{fr:'12 V DC · 2,5 W',en:'12 V DC · 2.5 W'} },
+        { k:{fr:'Température d’emploi',en:'Operating temperature'}, v:{fr:'−10 à +55 °C',en:'−10 to +55 °C'} },
+      ] },
+    { id:'fnx-swir', n:'FNX-SWIR',
+      rows:[
+        { k:{fr:'Capteur',en:'Sensor'},        v:{fr:'InGaAs',en:'InGaAs'} },
+        { k:{fr:'Résolution',en:'Resolution'}, v:{fr:'640 × 512 (VGA)',en:'640 × 512 (VGA)'} },
+        { k:{fr:'Pas pixel',en:'Pixel pitch'}, v:{fr:'15 µm',en:'15 µm'} },
+        { k:{fr:'Bande',en:'Spectrum'},        v:{fr:'0,9 – 1,7 µm',en:'0.9 – 1.7 µm'} },
+        { k:{fr:'Dynamique',en:'Dynamic range'}, v:{fr:'modes gain haut / gain bas',en:'high gain / low gain modes'} },
+        { k:{fr:'Interface',en:'Interface'},   v:{fr:'MIPI CSI-2 / USB 3.0',en:'MIPI CSI-2 / USB 3.0'} },
+        { k:{fr:'Protocole',en:'Protocol'},    v:{fr:'USB-UVC',en:'USB-UVC'} },
+        { k:{fr:'Architecture',en:'Architecture'}, v:{fr:'commune à la gamme THR-LW',en:'shared with the THR-LW range'},
+          c:{fr:'format mécanique plus large',en:'wider mechanical format'} },
+      ] },
+    { id:'asb-1080', n:'ASB-1080 Mono',
+      rows:[
+        { k:{fr:'Capteur',en:'Sensor'},        v:{fr:'CMOS global shutter 1/2,9″',en:'1/2.9″ global shutter CMOS'} },
+        { k:{fr:'Résolution',en:'Resolution'}, v:{fr:'1920 × 1080 (FHD)',en:'1920 × 1080 (FHD)'} },
+        { k:{fr:'Fréquence',en:'Frame rate'},  v:{fr:'60 im/s',en:'60 fps'},
+          c:{fr:'à pleine résolution',en:'at full resolution'} },
+        { k:{fr:'Efficacité d’obturation',en:'Shutter efficiency'}, v:{fr:'> 99,9 %',en:'> 99.9%'} },
+        { k:{fr:'Monture',en:'Mount'},         v:{fr:'C / CS',en:'C / CS'} },
+        { k:{fr:'Interface',en:'Interface'},   v:{fr:'DVP vers FPGA / USB 3.0',en:'DVP to FPGA / USB 3.0'} },
+        { k:{fr:'Protocole',en:'Protocol'},    v:{fr:'USB-UVC',en:'USB-UVC'} },
+        { k:{fr:'Sensibilité spectrale',en:'Spectral response'}, v:{fr:'400 nm – 1 µm',en:'400 nm – 1 µm'} },
+      ] },
+    { id:'bnx', n:'BNX Carrier',
+      rows:[
+        { k:{fr:'Compatibilité',en:'Compatibility'}, v:{fr:'NVIDIA Jetson Xavier NX / Orin NX',en:'NVIDIA Jetson Xavier NX / Orin NX'} },
+        { k:{fr:'Entrées caméra',en:'Camera inputs'}, v:{fr:'3 × MIPI CSI-2',en:'3 × MIPI CSI-2'},
+          c:{fr:'par HDMI étanche',en:'over waterproofed HDMI'} },
+        { k:{fr:'Réseau',en:'Networking'},     v:{fr:'1 × Gigabit Ethernet étanche',en:'1 × waterproofed Gigabit Ethernet'} },
+        { k:{fr:'Stockage',en:'Storage'},      v:{fr:'1 × M.2 NVMe Key M',en:'1 × M.2 NVMe Key M'} },
+        { k:{fr:'Affichage',en:'Display'},     v:{fr:'1 × DisplayPort 4K à 60 Hz',en:'1 × DisplayPort 4K at 60 Hz'} },
+        { k:{fr:'Accélération',en:'Acceleration'}, v:{fr:'CUDA / TensorRT',en:'CUDA / TensorRT'} },
+        { k:{fr:'Système',en:'Operating system'},  v:{fr:'Linux embarqué',en:'Embedded Linux'} },
+        { k:{fr:'Commande',en:'Control'},          v:{fr:'I²C',en:'I²C'} },
+        { k:{fr:'Liaison sans fil',en:'Wireless'}, v:{fr:'Wi-Fi / 5G',en:'Wi-Fi / 5G'} },
+        { k:{fr:'Tension d’entrée',en:'Input voltage'}, v:{fr:'9 – 19 V DC',en:'9 – 19 V DC'} },
+        { k:{fr:'Refroidissement',en:'Cooling'}, v:{fr:'passif, sans ventilateur',en:'passive, fanless'} },
+        { k:{fr:'Connectique',en:'Connectors'},  v:{fr:'endurcie',en:'ruggedised'},
+          c:{fr:'poussière et humidité',en:'dust and moisture'} },
+      ] },
+  ],
+};
+
+/* ---------- Études de cas ----------
+   Deux projets livrés, documentés au même format que les relevés comparatifs.
+   Images extraites des séquences publiées par la société. */
+const CASES = {
+  ey:{fr:'Projets livrés',en:'Delivered projects'},
+  h:{fr:'Deux systèmes en service',en:'Two systems in service'},
+  items:[
+    { id:'particules',
+      h:{fr:'Suivi de particules en trois dimensions dans un flux d’air',
+         en:'Three-dimensional particle tracking in an airflow'},
+      p:{fr:'Des caméras ASB-1080 à global shutter suivent des particules dans un volume. L’obturation globale fige chaque particule sans traînée de balayage, ce qui rend les trajectoires exploitables image après image. Le système reconstruit les déplacements en trois dimensions et en déduit les schémas de circulation d’air en salle blanche et en installation de chauffage, ventilation et climatisation, avec des données de qualité d’air et d’efficacité de circulation disponibles en temps réel.',
+         en:'ASB-1080 global shutter cameras track particles across a volume. Global shuttering freezes each particle with no rolling smear, which makes the tracks usable frame after frame. The system reconstructs the motion in three dimensions and derives airflow patterns in cleanrooms and in heating, ventilation and air-conditioning installations, with air quality and circulation efficiency available in real time.'},
+      cols:[ {n:{fr:'Début d’acquisition',en:'Start of acquisition'},  img:'particules-1.jpg'},
+             {n:{fr:'Accumulation des tracés',en:'Track accumulation'}, img:'particules-2.jpg'},
+             {n:{fr:'Fin de séquence',en:'End of sequence'},            img:'particules-3.jpg'} ],
+      metric:{fr:'Partenaire industriel · 2023',en:'Industrial partner · 2023'},
+      gear:{fr:'ASB-1080 Mono',en:'ASB-1080 Mono'} },
+
+    { id:'drone',
+      h:{fr:'Navigation de drone en environnement privé de GPS',
+         en:'Drone navigation in a GPS-denied environment'},
+      p:{fr:'Navigation visuelle « inside-out » : le drone se localise en regardant le sol, sans signal extérieur. Une carte apprise au préalable et le traitement embarqué recalent la position en vol. L’affichage de mission confronte la trajectoire de référence et la trajectoire estimée, et rend compte du nombre d’amers verrouillés et de l’indice de confiance de la solution. La localisation annoncée est de 20 cm, ce qui ouvre le vol autonome en tunnel et en canyon urbain.',
+         en:'Inside-out visual navigation: the drone locates itself by looking at the ground, with no external signal. A pre-learned map and on-board processing correct the position in flight. The mission display sets the reference track against the estimated track, and reports the number of locked landmarks and the confidence index of the solution. Stated localisation is 20 cm, which opens autonomous flight in tunnels and urban canyons.'},
+      cols:[ {n:{fr:'Début de mission',en:'Start of mission'}, img:'drone-1.jpg'},
+             {n:{fr:'Mi-parcours',en:'Mid-course'},            img:'drone-2.jpg'},
+             {n:{fr:'Fin de trajectoire',en:'End of track'},    img:'drone-3.jpg'} ],
+      metric:{fr:'Défense et robotique · 2024 · localisation 20 cm',
+              en:'Defence and robotics · 2024 · 20 cm localisation'},
+      gear:{fr:'Traitement embarqué',en:'On-board processing'} },
+  ],
+};
+
+/* ---------- Pages légales ----------
+   Confidentialité reprise des deux versions linguistiques existantes.
+   Conditions de vente et mentions légales : rien à reprendre. */
+const LEGAL = {
+  privacy: {
+    slug:{fr:'confidentialite',en:'privacy'},
+    ey:{fr:'Mentions',en:'Legal'},
+    h:{fr:'Confidentialité',en:'Privacy'},
+    intro:{fr:'Cette page explique simplement comment les informations sont traitées sur la version statique de notre site.',
+           en:'This page simply explains how information is handled on the static version of our website.'},
+    sections:[
+      { h:{fr:'Ce site ne crée pas de compte utilisateur',en:'This site does not create user accounts'},
+        p:[{fr:'La version statique du site ne propose pas de connexion, de tableau de bord client, d’espace employé ou de base de données applicative. Les pages concernées renvoient vers la page de contact.',
+            en:'The static version of the site does not provide login, customer dashboards, employee areas or an application database. Related pages redirect to the contact page.'}] },
+      { h:{fr:'Contact par e-mail',en:'Contact by email'},
+        p:[{fr:'Le formulaire de contact ouvre votre logiciel de messagerie. Le message n’est envoyé que si vous le validez depuis votre propre client e-mail.',
+            en:'The contact form opens your email client. The message is only sent if you confirm it from your own email application.'},
+           {fr:'Les informations transmises peuvent inclure votre nom, votre adresse e-mail et le contenu de votre demande.',
+            en:'The information sent may include your name, email address and the content of your request.'}] },
+      { h:{fr:'Mesure d’audience et cookies',en:'Analytics and cookies'},
+        p:[{fr:'Cette version du site n’utilise pas de cookies publicitaires. Certains réglages de confort, comme le thème ou la langue, peuvent être conservés localement dans votre navigateur.',
+            en:'This version of the site does not use advertising cookies. Some convenience settings, such as theme or language, may be stored locally in your browser.'}] },
+      { h:{fr:'Vos demandes',en:'Your requests'},
+        p:[{fr:'Pour toute question, modification ou suppression d’un échange envoyé par e-mail, contactez-nous directement.',
+            en:'For any question, modification or deletion request regarding an email exchange, contact us directly.'}] },
+    ],
+    updated:{fr:'Dernière mise à jour : 16 septembre 2026',en:'Last updated: 16 September 2026'},
+  },
+};
 
 /* ---------- Relevés comparatifs ---------- */
 const PROOF = [
@@ -91,21 +233,21 @@ const PROOF = [
     p:{fr:'Deux plaques indiscernables à l’œil, mises à l’équilibre thermique. En 8–14 µm l’écart est nul. En 0,9–1,7 µm la réflectance diffère franchement : la discrimination porte sur la matière.',
        en:'Two panels indistinguishable to the eye, at thermal equilibrium. At 8–14 µm the difference is nil. At 0.9–1.7 µm reflectance differs plainly: discrimination is on material.'},
     cols:[ {n:{fr:'Visible',en:'Visible'}, img:'poc-jumeaux-vis.jpg'},
-           {n:{fr:'LWIR — confondues',en:'LWIR — indistinguishable'}, img:'poc-jumeaux-lwir.jpg'},
-           {n:{fr:'SWIR — séparées',en:'SWIR — separated'}, img:'poc-jumeaux-swir.jpg'} ],
+           {n:{fr:'LWIR, confondues',en:'LWIR, indistinguishable'}, img:'poc-jumeaux-lwir.jpg'},
+           {n:{fr:'SWIR, séparées',en:'SWIR, separated'}, img:'poc-jumeaux-swir.jpg'} ],
     metric:{fr:'Écart thermique < 0,2 K · recalage inter-bandes cible < 1 px',
             en:'Thermal delta < 0.2 K · inter-band registration target < 1 px'},
     gear:{fr:'Metacamera',en:'Metacamera'} },
 
   { id:'retro',
     h:{fr:'Une optique en observation se trahit à 150 m',en:'An observing optic gives itself away at 150 m'},
-    p:{fr:'Toute optique renvoie la lumière vers sa source. Sous illumination coaxiale eye-safe, un objectif enfoui dans une haie rend un point saturant. La difficulté n’est pas de le détecter : c’est de garder la scène exploitable dans la même image.',
-       en:'Any optic returns light toward its source. Under eye-safe coaxial illumination, a lens buried in a hedgerow returns a saturating point. The difficulty is not detecting it: it is keeping the scene usable in the same frame.'},
+    p:{fr:'Toute optique renvoie la lumière vers sa source. Sous illumination coaxiale eye-safe, un objectif enfoui dans une haie rend un point saturant. Le point dur tient à la dynamique : garder la scène lisible pendant qu’un point sature.',
+       en:'Any optic returns light toward its source. Under eye-safe coaxial illumination, a lens buried in a hedgerow returns a saturating point. The hard part is dynamic range: keeping the scene readable while one point saturates.'},
     cols:[ {n:{fr:'Visible',en:'Visible'}, img:'poc-retro-vis.jpg'},
            {n:{fr:'SWIR + illuminateur',en:'SWIR + illuminator'}, img:'poc-retro-swir.jpg', mark:true} ],
     metric:{fr:'150 m · illuminateur 1550 nm eye-safe · contraste à mesurer',
             en:'150 m · 1550 nm eye-safe illuminator · contrast TBC'},
-    gear:{fr:'FONIX + illuminateur coaxial',en:'FONIX + coaxial illuminator'} },
+    gear:{fr:'FNX-SWIR + illuminateur coaxial',en:'FNX-SWIR + coaxial illuminator'} },
 ];
 
 /* ---------- Bandeau chiffré ---------- */
@@ -129,87 +271,91 @@ const STAGES = [
   { id:'optique', img:'pc-0-optique.png', r:373,
     n:{fr:'Optique',en:'Optics'},
     h:{fr:'Objectif dessiné pour la bande et pour le porteur',en:'Lens designed for the band and the platform'},
-    p:{fr:'Combinaison optique calculée en interne selon la bande : verres et traitements antireflet différents en visible, en SWIR et en LWIR. Athermalisation sur la plage d’emploi, monture tenue en vibration, champ et ouverture arbitrés avec vous.',
-       en:'Optical combination computed in-house for the band: different glasses and AR coatings in visible, SWIR and LWIR. Athermalisation over the operating range, vibration-rated mount, field and aperture arbitrated with you.'},
+    p:{fr:'Combinaison optique calculée en interne selon la bande : verres et traitements antireflet différents en visible, en SWIR et en LWIR. Athermalisation sur la plage d’emploi, monture tenue en vibration, champ et ouverture arbitrés avec vous. Sur la THR-LW, l’objectif se monte et se démonte : plusieurs formats optiques sont proposés pour un même corps de caméra.',
+       en:'Optical combination computed in-house for the band: different glasses and AR coatings in visible, SWIR and LWIR. Athermalisation over the operating range, vibration-rated mount, field and aperture arbitrated with you. On the THR-LW the lens is removable: several optical formats are offered for the same camera body.'},
     mod:{fr:['Focale et champ','Ouverture et profondeur de champ','Traitement selon la bande','Monture et interface mécanique'],
          en:['Focal length and field','Aperture and depth of field','Coating per band','Mount and mechanical interface']} },
 
   { id:'capot', img:'pc-1-capot.png', r:438,
     n:{fr:'Capot & mécanique',en:'Housing & mechanics'},
     h:{fr:'Étanchéité, dissipation, tenue mécanique',en:'Sealing, heat dissipation, mechanical strength'},
-    p:{fr:'Le capot évacue la chaleur du calcul sans ventilateur, protège l’ensemble et porte les interfaces mécaniques. Les contraintes d’encombrement et de masse du porteur sont des entrées de conception, pas des conséquences.',
-       en:'The housing removes compute heat without a fan, protects the assembly and carries the mechanical interfaces. Platform envelope and mass constraints are design inputs, not consequences.'},
+    p:{fr:'Le capot évacue la chaleur du calcul sans ventilateur, protège l’ensemble et porte les interfaces mécaniques. L’encombrement et la masse admissibles par le porteur sont fixés en début d’étude et commandent le reste de la conception. La THR-LW tient dans 55 × 55 × 40 mm et fonctionne de −10 à +55 °C ; le corps coté sur la vue éclatée mesure 50 × 50 × 35 mm, hors objectif et connectique.',
+       en:'The housing removes compute heat without a fan, protects the assembly and carries the mechanical interfaces. The envelope and mass the platform allows are fixed at the start of the study and drive the rest of the design. The THR-LW fits within 55 × 55 × 40 mm and operates from −10 to +55 °C; the body dimensioned on the exploded view measures 50 × 50 × 35 mm, excluding lens and connectors.'},
     mod:{fr:['Encombrement et masse','Indice de protection','Dissipation passive ou assistée','Fixations et repères mécaniques'],
          en:['Envelope and mass','Ingress protection','Passive or assisted dissipation','Fixings and mechanical datums']} },
 
   { id:'capteur', img:'pc-2-capteur.png', r:295,
     n:{fr:'Capteur',en:'Sensor'},
     h:{fr:'Détecteur et électronique de proximité',en:'Detector and proximity electronics'},
-    p:{fr:'Microbolomètre en LWIR, InGaAs en SWIR, CMOS en visible et NIR. L’électronique de proximité est dessinée par nos soins : pilotage, séquencement, correction de non-uniformité, gestion du gain. C’est là que se joue la qualité du premier pixel.',
-       en:'Microbolometer in LWIR, InGaAs in SWIR, CMOS in visible and NIR. Proximity electronics are drawn by us: driving, sequencing, non-uniformity correction, gain management. This is where the quality of the first pixel is decided.'},
+    p:{fr:'Microbolomètre en LWIR, InGaAs en SWIR, CMOS en visible et NIR. L’électronique de proximité est dessinée par nos soins : pilotage, séquencement, correction de non-uniformité, gestion du gain. Cet étage fixe la qualité du premier pixel. Sur la THR-LW, le détecteur est un microbolomètre de pas 12 µm en 640 × 480, non refroidi et sans obturateur mécanique, pour une sensibilité annoncée sous 60 mK.',
+       en:'Microbolometer in LWIR, InGaAs in SWIR, CMOS in visible and NIR. Proximity electronics are drawn by us: driving, sequencing, non-uniformity correction, gain management. This stage sets the quality of the first pixel. On the THR-LW the detector is an uncooled 12 µm pitch microbolometer at 640 × 480, with no mechanical shutter, for a stated sensitivity below 60 mK.'},
     mod:{fr:['Choix du détecteur et du format','Cadence et temps d’intégration','Stratégie de correction (NUC)','Synchronisation entre bandes'],
          en:['Detector and format choice','Frame rate and integration time','Correction strategy (NUC)','Inter-band synchronisation']} },
 
   { id:'calcul', img:'pc-3-calcul.png', r:214,
     n:{fr:'Calcul embarqué',en:'Embedded compute'},
     h:{fr:'FPGA au fil du flux, GPU pour l’inférence',en:'FPGA on the stream, GPU for inference'},
-    p:{fr:'Le FPGA met en forme le flux pixel à la volée — correction, recalage inter-bandes, horodatage — sans mémoire de trame inutile. Le GPU exécute la détection. Le CPU du porteur n’est pas sollicité : il reste à la fonction système.',
-       en:'The FPGA shapes the pixel stream on the fly — correction, inter-band registration, time-stamping — with no needless frame memory. The GPU runs detection. The platform CPU is untouched: it stays on the system function.'},
+    p:{fr:'Le FPGA met en forme le flux pixel à la volée : correction, recalage inter-bandes, horodatage, sans mémoire de trame inutile. Le GPU exécute la détection. Le CPU du porteur reste disponible pour la fonction système. Sur la THR-LW, le FPGA porte la correction de non-uniformité, la correction de pixels défectueux et le gain automatique, et sort un flux 14 bits jusqu’à 60 Hz.',
+       en:'The FPGA shapes the pixel stream on the fly: correction, inter-band registration, time-stamping, with no needless frame memory. The GPU runs detection. The platform CPU stays available for the system function. On the THR-LW the FPGA carries non-uniformity correction, defective pixel correction and automatic gain, and outputs a 14-bit stream at up to 60 Hz.'},
     mod:{fr:['Budget de latence','Modèle d’inférence embarqué','Enveloppe de consommation','Répartition bord / sol'],
          en:['Latency budget','Embedded inference model','Power envelope','On-board / ground split']} },
 
   { id:'embase', img:'pc-4-embase.png', r:236,
     n:{fr:'Embase & interfaces',en:'Base & interfaces'},
     h:{fr:'Ce que le système reçoit, et sous quelle forme',en:'What the system receives, and in what form'},
-    p:{fr:'Alimentation, synchronisation, protocoles et connectique. Le format de sortie est une décision d’architecture : flux brut, flux corrigé et recalé, ou métadonnées horodatées seules. Nous livrons la documentation qui permet à l’intégrateur de tenir sa propre autorité de conception.',
-       en:'Power, synchronisation, protocols and connectors. The output format is an architecture decision: raw stream, corrected and registered stream, or time-stamped metadata alone. We deliver the documentation that lets the integrator hold their own design authority.'},
+    p:{fr:'Alimentation, synchronisation, protocoles et connectique. Le format de sortie est une décision d’architecture : flux brut, flux corrigé et recalé, ou métadonnées horodatées seules. Nous livrons la documentation qui permet à l’intégrateur de tenir sa propre autorité de conception. La THR-LW sort en USB 3.1 Type-C ou en MIPI CSI-2 et se contente de 12 V pour 2,5 W.',
+       en:'Power, synchronisation, protocols and connectors. The output format is an architecture decision: raw stream, corrected and registered stream, or time-stamped metadata alone. We deliver the documentation that lets the integrator hold their own design authority. The THR-LW outputs over USB 3.1 Type-C or MIPI CSI-2 and draws 2.5 W at 12 V.'},
     mod:{fr:['Protocole et connectique','Format et débit de sortie','Horloge et synchronisation externe','Documentation et transfert'],
          en:['Protocol and connectors','Output format and rate','Clock and external sync','Documentation and transfer']} },
 ];
 
 /* ---------- Gamme ---------- */
 const RANGE = {
-  /* Visuels détourés à déposer dans assets/media/instruments/ :
-     kalix.webp · fonix.webp · metacamera.webp · basen.webp
-     Source : sma-rty.com (voir README). Fond transparent ou noir. */
+  /* Visuels détourés importés du catalogue sma-rty.fr (fond transparent),
+     redimensionnés à 620 px. Les identifiants restent inchangés : ce sont
+     les ancres (#in-kalix…) utilisées ailleurs dans la page. */
   cards:[
-    { id:'kalix', img:'kalix.webp', n:'KALIX', b:'LWIR 8–14 µm',
+    { id:'kalix', spec:'thr-lw', slug:'thr-lw', src:'https://sma-rty.fr/fr/products/thr-lw/', img:'thr-lw.png', n:'THR-LW Thermal', b:'LWIR 8–14 µm',
       h:{fr:'Caméra thermique intelligente, sans volet mécanique',
          en:'Smart thermal camera, no mechanical shutter'},
       p:{fr:'Les erreurs et aberrations thermiques sont corrigées par traitement embarqué, ce qui supprime le volet de calibration et les interruptions d’image qu’il impose.',
          en:'Thermal errors and aberrations are corrected by on-board processing, removing the calibration shutter and the image interruptions it imposes.'},
-      award:{fr:'Prix Électrons d’Or 2023 — catégorie Électronique industrielle',
-             en:'Électrons d’Or Award 2023 — Industrial Electronics category'} },
-    { id:'fonix', img:'fonix.webp', n:'FONIX', b:'SWIR 0,9–1,7 µm',
+      award:{fr:'Prix Électrons d’Or 2023, catégorie Électronique industrielle',
+             en:'Électrons d’Or Award 2023, Industrial Electronics category'} },
+    { id:'fonix', spec:'fnx-swir', slug:'fnx-swir', src:'https://sma-rty.fr/fr/products/fnx-swir/', img:'fnx-swir.png', n:'FNX-SWIR', b:'SWIR 0,9–1,7 µm',
       h:{fr:'Caméra SWIR pour la discrimination de matière',
          en:'SWIR camera for material discrimination'},
       p:{fr:'Réflectance au-delà du visible : eau et glace, dépôts, textiles, et sources actives à 1,06 et 1,55 µm.',
          en:'Reflectance beyond the visible: water and ice, deposits, textiles, and active sources at 1.06 and 1.55 µm.'} },
-    { id:'metacamera', img:'metacamera.webp', n:'METACAMERA', b:{fr:'Visible · NIR · SWIR · LWIR',en:'Visible · NIR · SWIR · LWIR'},
+    { id:'metacamera', slug:'metacamera', img:'metacamera.png', n:'METACAMERA', b:{fr:'Visible · NIR · SWIR · LWIR',en:'Visible · NIR · SWIR · LWIR'},
       h:{fr:'Tête multi-bandes recalée et fusionnée',en:'Registered, fused multi-band head'},
       p:{fr:'Acquisition simultanée des quatre bandes sur un même axe, recalage au pixel et couche de fusion à la cadence capteur.',
          en:'Simultaneous acquisition of all four bands on one axis, pixel registration and a fusion layer at sensor rate.'} },
-    { id:'basen', img:'basen.webp', n:{fr:'CALCUL EMBARQUÉ',en:'EMBEDDED COMPUTE'}, b:{fr:'FPGA + GPU',en:'FPGA + GPU'},
+    { id:'basen', spec:'bnx', slug:'bnx', src:'https://sma-rty.fr/fr/products/bnx/', img:'bnx.png', n:'BNX Carrier', b:{fr:'FPGA + GPU',en:'FPGA + GPU'},
       h:{fr:'Module de traitement au plus près du capteur',en:'Processing module closest to the sensor'},
       p:{fr:'Mise en forme du flux pixel sur FPGA, inférence sur GPU, sortie en métadonnées horodatées. Intégrable aux trois têtes.',
          en:'FPGA pixel-stream shaping, GPU inference, time-stamped metadata output. Integrable with all three heads.'} },
   ],
+  more:{fr:'Voir la fiche',en:'View the sheet'},
+  back:{fr:'Retour aux instruments',en:'Back to instruments'},
+  srcL:{fr:'Fiche constructeur',en:'Manufacturer sheet'},
   cols:{ fr:['Instrument','Bande','Fonction dominante','Sortie','Statut'],
          en:['Instrument','Band','Primary function','Output','Status'] },
   rows:[
-    { k:'KALIX', b:'LWIR 8–14 µm',
-      f:{fr:'Nuit, obscurcissants secs, anomalie thermique — sans volet mécanique',en:'Night, dry obscurants, thermal anomaly — shutterless'},
+    { k:'THR-LW', b:'LWIR 8–14 µm',
+      f:{fr:'Nuit, obscurcissants secs, anomalie thermique, sans volet mécanique',en:'Night, dry obscurants, thermal anomaly, shutterless'},
       o:{fr:'Flux corrigé + détections',en:'Corrected stream + detections'},
       s:{fr:'En production',en:'In production'} },
-    { k:'FONIX', b:'SWIR 0,9–1,7 µm',
+    { k:'FNX-SWIR', b:'SWIR 0,9–1,7 µm',
       f:{fr:'Matière, eau et glace, sources 1,06 / 1,55 µm',en:'Materials, water and ice, 1.06 / 1.55 µm sources'},
       o:{fr:'Flux corrigé + détections',en:'Corrected stream + detections'},
-      s:{fr:'En production',en:'In production'} },
+      /* statut repris du catalogue sma-rty.fr/fr/products/fnx-swir/ */
+      s:{fr:'Intégration anticipée',en:'Early integration'} },
     { k:'METACAMERA', b:{fr:'Visible · NIR · SWIR · LWIR',en:'Visible · NIR · SWIR · LWIR'},
       f:{fr:'Acquisition multi-bandes recalée et fusionnée',en:'Registered, fused multi-band acquisition'},
       o:{fr:'Bandes recalées + couche de fusion',en:'Registered bands + fusion layer'},
       s:{fr:'Plateforme d’étude et d’intégration',en:'Study and integration platform'} },
-    { k:{fr:'CALCUL EMBARQUÉ',en:'EMBEDDED COMPUTE'}, b:{fr:'—',en:'—'},
+    { k:'BNX Carrier', b:{fr:'Sans objet',en:'Not applicable'},
       f:{fr:'Mise en forme FPGA, inférence GPU à bord',en:'FPGA shaping, on-board GPU inference'},
       o:{fr:'Métadonnées horodatées',en:'Time-stamped metadata'},
       s:{fr:'Intégrable aux trois têtes',en:'Integrable with all three heads'} },
@@ -250,14 +396,14 @@ const TRUST = {
   ey:{fr:'Références & conformité',en:'References & compliance'},
   h:{fr:'Ce qu’un maître d’œuvre vérifie avant de vous consulter',
      en:'What a prime contractor checks before consulting you'},
-  p:{fr:'Un fournisseur de sous-ensemble optronique est évalué sur son statut, sa capacité de qualification et la traçabilité de sa chaîne — avant toute question d’habilitation.',
-     en:'An optronic sub-system supplier is assessed on status, qualification capability and supply-chain traceability — before any clearance question.'},
+  p:{fr:'Un fournisseur de sous-ensemble optronique est évalué sur son statut, sa capacité de qualification et la traçabilité de sa chaîne, avant toute question d’habilitation.',
+     en:'An optronic sub-system supplier is assessed on status, qualification capability and supply-chain traceability, before any clearance question.'},
   groups:[
     { n:{fr:'Statut fournisseur',en:'Supplier status'}, items:[
       { t:{fr:'Code NCAGE / OTAN',en:'NCAGE / NATO code'}, st:'tbc',
         d:{fr:'Identifiant fournisseur reconnu par les organismes d’armement.',en:'Supplier identifier recognised by defence procurement bodies.'} },
       { t:{fr:'Enregistrement biens à double usage',en:'Dual-use registration'}, st:'tbc',
-        d:{fr:'Règlement (UE) 2021/821 — classement des produits et procédure de licence en place.',en:'Regulation (EU) 2021/821 — product classification and licensing procedure in place.'} },
+        d:{fr:'Règlement (UE) 2021/821 : classement des produits et procédure de licence en place.',en:'Regulation (EU) 2021/821: product classification and licensing procedure in place.'} },
       { t:{fr:'Capital et direction français',en:'French capital and management'}, st:'ok',
         d:{fr:'Aucun contrôle extra-européen. SIREN 845 146 935.',en:'No non-European control. Company registration 845 146 935.'} },
       { t:{fr:'Pérennité',en:'Continuity'}, st:'ok',
@@ -265,7 +411,7 @@ const TRUST = {
     ]},
     { n:{fr:'Qualification & environnement',en:'Qualification & environment'}, items:[
       { t:{fr:'Conception selon MIL-STD-810',en:'Design to MIL-STD-810'}, st:'tbc',
-        d:{fr:'Thermique, vibrations, chocs — méthodes applicables identifiées par porteur.',en:'Thermal, vibration, shock — applicable methods identified per platform.'} },
+        d:{fr:'Thermique, vibrations, chocs : méthodes applicables identifiées par porteur.',en:'Thermal, vibration, shock: applicable methods identified per platform.'} },
       { t:{fr:'CEM selon MIL-STD-461 / DO-160',en:'EMC to MIL-STD-461 / DO-160'}, st:'tbc',
         d:{fr:'Campagnes conduites en laboratoire accrédité.',en:'Campaigns run in an accredited laboratory.'} },
       { t:{fr:'Démarche qualité ISO 9001',en:'ISO 9001 quality system'}, st:'tbc',
@@ -274,7 +420,7 @@ const TRUST = {
         d:{fr:'Identification unique par instrument, dossier de définition maintenu.',en:'Unique identification per instrument, maintained definition file.'} },
     ]},
     { n:{fr:'Recherche & propriété',en:'Research & IP'}, items:[
-      { t:{fr:'Institut Pascal — UMR CNRS / UCA',en:'Institut Pascal — CNRS / UCA joint unit'}, st:'ok',
+      { t:{fr:'Institut Pascal, UMR CNRS / UCA',en:'Institut Pascal, CNRS / UCA joint unit'}, st:'ok',
         d:{fr:'Implantation sur site, travaux conduits avec l’unité.',en:'On-site location, work conducted with the unit.'} },
       { t:{fr:'Partenaires : UCA, Clermont Auvergne INP, INESCOP',en:'Partners: UCA, Clermont Auvergne INP, INESCOP'}, st:'ok',
         d:{fr:'Coopérations de recherche et d’essais.',en:'Research and testing partnerships.'} },
@@ -297,8 +443,8 @@ const TRUST = {
   /* Le point d'habilitation, traité de face plutôt qu'esquivé. */
   clearance:{
     t:{fr:'Habilitation Secret Défense',en:'Defence security clearance'},
-    d:{fr:'SMA-RTY France ne détient pas d’habilitation à ce jour. Les demandes d’habilitation individuelle et d’homologation de site sont engagées dès qu’un programme le requiert : la structure de l’entreprise — capital et direction français, production sur site unique, aucun contrôle extra-européen — ne présente aucun obstacle connu à l’instruction. Nos travaux se conduisent aujourd’hui au niveau Diffusion Restreinte et sur des sous-ensembles non classifiés, ce qui couvre la phase d’étude et de levée de risque de la plupart des programmes.',
-       en:'SMA-RTY France does not currently hold a clearance. Individual clearance and site accreditation are initiated as soon as a programme requires them: the company structure — French capital and management, single-site production, no non-European control — presents no known obstacle to the process. Work today is conducted at restricted-distribution level and on unclassified sub-systems, which covers the study and risk-reduction phase of most programmes.'} },
+    d:{fr:'SMA-RTY France ne détient pas d’habilitation à ce jour. Les demandes d’habilitation individuelle et d’homologation de site sont engagées dès qu’un programme le requiert : la structure de l’entreprise (capital et direction français, production sur site unique, aucun contrôle extra-européen) ne présente aucun obstacle connu à l’instruction. Nos travaux se conduisent aujourd’hui au niveau Diffusion Restreinte et sur des sous-ensembles non classifiés, ce qui couvre la phase d’étude et de levée de risque de la plupart des programmes.',
+       en:'SMA-RTY France does not currently hold a clearance. Individual clearance and site accreditation are initiated as soon as a programme requires them: the company structure (French capital and management, single-site production, no non-European control) presents no known obstacle to the process. Work today is conducted at restricted-distribution level and on unclassified sub-systems, which covers the study and risk-reduction phase of most programmes.'} },
 };
 
 /* ============================================================
@@ -348,61 +494,64 @@ const LAB = {
 const TEAM = {
   ey:{fr:'Équipe',en:'Team'},
   h:{fr:'Direction et ingénierie',en:'Management and engineering'},
-  p:{fr:'Quatre ingénieurs et chercheurs à Aubière. C’est l’un d’eux qui lit votre demande, pas un service commercial.',
-     en:'Four engineers and researchers in Aubière. One of them reads your request, not a sales desk.'},
+  p:{fr:'Quatre ingénieurs et chercheurs à Aubière. L’un d’eux lit votre demande et y répond.',
+     en:'Four engineers and researchers in Aubière. One of them reads your request and answers it.'},
   hint:{fr:'Survolez un portrait pour le parcours détaillé.',en:'Hover a portrait for the detailed background.'},
   members:[
     { id:'fb', ph:'fb.jpg', n:'François Berry', ini:'FB',
-      role:{fr:'Président — Directeur général',en:'Chief Executive Officer'},
+      role:{fr:'Chief Executive Officer SMF',en:'Chief Executive Officer SMF'},
       dom:{fr:'Caméras intelligentes, architectures FPGA de vision',en:'Smart cameras, FPGA vision architectures'},
       edu:{fr:'Professeur des universités, Université Clermont Auvergne',en:'Full Professor, Université Clermont Auvergne'},
-      from:{fr:'Institut Pascal (UMR CNRS / UCA) — équipe vision embarquée',en:'Institut Pascal (CNRS / UCA joint unit) — embedded vision group'},
+      from:{fr:'Institut Pascal (UMR CNRS / UCA), équipe vision embarquée',en:'Institut Pascal (CNRS / UCA joint unit), embedded vision group'},
       yrs:{fr:'25+',en:'25+'},
       out:{fr:'Architectures de caméras intelligentes à base de FPGA ; langage de traitement de flux sur FPGA ; publications à comité de lecture',
            en:'FPGA-based smart camera architectures; FPGA stream-processing language; peer-reviewed publications'},
       bio:{fr:'Conduit la stratégie technique de SMA-RTY France et le lien avec la recherche académique. Ses travaux portent depuis deux décennies sur le traitement d’image au plus près du capteur.',
-           en:'Leads the technical strategy of SMA-RTY France and its articulation with academic research. His work has focused for two decades on processing images as close as possible to the sensor — precisely the question raised by real-time multispectral.'},
-      li:'https://www.linkedin.com/in/fran%C3%A7ois-berry-a4399a2/' },
+           en:'Leads the technical strategy of SMA-RTY France and its articulation with academic research. His work has focused for two decades on processing images as close as possible to the sensor, which is the question real-time multispectral raises.'},
+      li:'https://www.linkedin.com/in/fran%C3%A7ois-berry-a4399a2/',
+      rg:'https://www.researchgate.net/profile/Francois-Berry-2' },
 
     { id:'ka', ph:'ka.jpg', n:'Kamel Abdelouahab', ini:'KA',
-      role:{fr:'Spécialiste IA embarquée',en:'Edge AI Specialist'},
+      role:{fr:'Edge AI Specialist',en:'Edge AI Specialist'},
       dom:{fr:'Inférence de réseaux de neurones sur FPGA et calcul embarqué',en:'Neural network inference on FPGA and embedded compute'},
-      edu:{fr:'Docteur — Université Clermont Auvergne / Institut Pascal',en:'PhD — Université Clermont Auvergne / Institut Pascal'},
-      from:{fr:'Institut Pascal — accélération d’inférence sur cible embarquée',en:'Institut Pascal — inference acceleration on embedded targets'},
+      edu:{fr:'Docteur, Université Clermont Auvergne / Institut Pascal',en:'PhD, Université Clermont Auvergne / Institut Pascal'},
+      from:{fr:'Institut Pascal, accélération d’inférence sur cible embarquée',en:'Institut Pascal, inference acceleration on embedded targets'},
       yrs:{fr:'10+',en:'10+'},
       out:{fr:'Travaux de référence sur l’accélération de l’inférence CNN sur FPGA ; publications à comité de lecture',
            en:'Reference work on accelerating CNN inference on FPGAs; peer-reviewed publications'},
       bio:{fr:'Responsable de la chaîne de détection embarquée : quantification des modèles, placement FPGA/GPU, budget de latence. C’est l’étage qui permet de sortir des métadonnées plutôt qu’un flux vidéo.',
            en:'Owns the on-board detection chain: model quantisation, FPGA/GPU placement, latency budget. This is the stage that allows metadata output rather than a video stream.'},
-      li:'https://www.linkedin.com/in/kamelabdelouahab/' },
+      li:'https://www.linkedin.com/in/kamelabdelouahab/',
+      rg:'https://www.researchgate.net/profile/Kamel-Abdelouahab' },
 
     { id:'em', ph:'em.jpg', n:'Edoardo Malaspina', ini:'EM',
-      role:{fr:'Ingénieur R&D — caméras multispectrales',en:'R&D Engineer — multispectral cameras'},
+      role:{fr:'PhD in Multispectral Smart Cameras',en:'PhD in Multispectral Smart Cameras'},
       dom:{fr:'Acquisition multi-bandes, recalage et fusion',en:'Multi-band acquisition, registration and fusion'},
-      edu:{fr:'Doctorat — caméras intelligentes multispectrales',en:'PhD — multispectral smart cameras'},
-      from:{fr:'— parcours antérieur à compléter —',en:'— previous background to complete —'},
-      yrs:'—',
+      edu:{fr:'Doctorat en caméras intelligentes multispectrales',en:'PhD in multispectral smart cameras'},
+      from:{fr:'Parcours antérieur à compléter',en:'Previous background to complete'},
+      yrs:{fr:'Non communiqué',en:'Not disclosed'},
       out:{fr:'Thèse sur les caméras intelligentes multispectrales',en:'PhD thesis on multispectral smart cameras'},
       bio:{fr:'Travaille sur l’acquisition simultanée de plusieurs bandes et sur leur recalage : synchronisation des capteurs, correction géométrique, couche de fusion. C’est le cœur de la différence entre quatre caméras et un instrument.',
            en:'Works on simultaneous multi-band acquisition and its registration: sensor synchronisation, geometric correction, fusion layer. This is the core of the difference between four cameras and one instrument.'},
-      li:'https://www.linkedin.com/in/edoardo-malaspina-75ba4b232/' },
+      li:'https://www.linkedin.com/in/edoardo-malaspina-75ba4b232/',
+      rg:'https://www.researchgate.net/profile/Edoardo-Malaspina' },
 
     { id:'yg', ph:'yg.jpg', n:'Yorick Geoffre', ini:'YG',
-      role:{fr:'Ingénieur systèmes embarqués',en:'Embedded Systems Engineer'},
+      role:{fr:'Embedded Engineer',en:'Embedded Engineer'},
       dom:{fr:'Électronique de proximité, firmware, interfaces',en:'Proximity electronics, firmware, interfaces'},
-      edu:{fr:'— formation à compléter —',en:'— education to complete —'},
-      from:{fr:'— parcours antérieur à compléter —',en:'— previous background to complete —'},
-      yrs:'—',
-      out:{fr:'— à compléter —',en:'— to complete —'},
+      edu:{fr:'Formation à compléter',en:'Education to complete'},
+      from:{fr:'Parcours antérieur à compléter',en:'Previous background to complete'},
+      yrs:{fr:'Non communiqué',en:'Not disclosed'},
+      out:{fr:'À compléter',en:'To complete'},
       bio:{fr:'Conçoit et met au point la chaîne électronique entre le détecteur et le système : pilotage capteur, séquencement, protocoles et connectique de sortie.',
            en:'Designs and commissions the electronic chain between detector and system: sensor driving, sequencing, protocols and output connectors.'},
       li:'https://www.linkedin.com/in/yorick-g-318b08221/' },
   ],
   labels:{ edu:{fr:'Formation',en:'Education'}, from:{fr:'Parcours',en:'Background'},
            dom:{fr:'Domaine',en:'Domain'}, yrs:{fr:'Ans d’expérience',en:'Years of experience'},
-           out:{fr:'Production',en:'Output'}, li:{fr:'LinkedIn',en:'LinkedIn'} },
-  src:{fr:'Fonctions et profils LinkedIn repris de sma-rty.com. Portraits à déposer dans assets/media/team/ (fb.jpg, ka.jpg, em.jpg, yg.jpg), format portrait 4/5, 800 px de large minimum.',
-       en:'Roles and LinkedIn profiles taken from sma-rty.com. Portraits to be placed in assets/media/team/ (fb.jpg, ka.jpg, em.jpg, yg.jpg), 4:5 portrait, 800 px wide minimum.'},
+           out:{fr:'Production',en:'Output'}, li:{fr:'LinkedIn',en:'LinkedIn'},
+           pub:{fr:'Publications',en:'Publications'} },
+
 };
 
 /* ============================================================
@@ -414,15 +563,15 @@ const QUAL = {
   ey:{fr:'Demande technique',en:'Technical enquiry'},
   h:{fr:'Un ingénieur vous répond sous 48 heures ouvrées',
      en:'An engineer replies within 48 working hours'},
-  intro:{fr:'Quatre questions suffisent à cadrer un besoin optronique. Vous obtenez un avis technique écrit — faisabilité, bande pertinente, points durs — pas une plaquette commerciale.',
-         en:'Four questions are enough to scope an optronic requirement. You receive a written technical opinion — feasibility, relevant band, sticking points — not a brochure.'},
+  intro:{fr:'Quatre questions suffisent à pré-cadrer un besoin optronique. Vous recevez un avis technique écrit : faisabilité, bande pertinente, points durs.',
+         en:'Four questions are enough to pre-scope an optronic requirement. You receive a written technical opinion: feasibility, relevant band, sticking points.'},
   back:{fr:'Retour',en:'Back'},
   skip:{fr:'Passer directement au contact',en:'Go straight to contact'},
   send:{fr:'Envoyer la note de cadrage',en:'Send the scoping note'},
   mailL:{fr:'Adresse professionnelle',en:'Work email'},
   orgL:{fr:'Organisation',en:'Organisation'},
   freeL:{fr:'Une précision, si vous le souhaitez',en:'One detail, if you wish'},
-  freeP:{fr:'Facultatif — une ligne suffit.',en:'Optional — one line is enough.'},
+  freeP:{fr:'Facultatif : une ligne suffit.',en:'Optional: one line is enough.'},
   nextT:{fr:'Ce que vous recevez',en:'What you receive'},
   sla:{fr:'Réponse sous 48 h ouvrées',en:'Reply within 48 working hours'},
   done:{fr:'Prototype : aucune donnée n’est transmise à ce stade.',en:'Prototype: no data is transmitted at this stage.'},
@@ -430,8 +579,8 @@ const QUAL = {
   steps:[
     { id:'entree', q:{fr:'Quelle est la nature de votre demande ?',en:'What is the nature of your enquiry?'},
       o:[ {v:'limite', t:{fr:'Lever une limite sur un système en service',en:'Lift a limitation on a fielded system'},
-             go:'terrain', ack:{fr:'Dans ce cas l’analyse part de la scène observée, pas du capteur.',
-                                en:'In that case the analysis starts from the observed scene, not the sensor.'} },
+             go:'terrain', ack:{fr:'Dans ce cas l’analyse part de la scène observée.',
+                                en:'In that case the analysis starts from the observed scene.'} },
           {v:'specif', t:{fr:'Spécifier une chaîne image pour un nouveau système',en:'Specify an imaging chain for a new system'},
              go:'archi', ack:{fr:'Les arbitrages structurants sont la bande, le format de sortie et le budget de latence.',
                               en:'The structuring trade-offs are band, output format and latency budget.'} },
@@ -473,11 +622,11 @@ const QUAL = {
     { id:'sortie', br:'archi', q:{fr:'Quelle sortie le système doit-il recevoir ?',en:'What output must the system receive?'},
       o:[ {v:'brut',t:{fr:'Flux brut, corrections côté système (CoaXPress / GigE)',en:'Raw stream, corrections system-side (CoaXPress / GigE)'}},
           {v:'corr',t:{fr:'Flux corrigé et recalé, prêt à exploiter',en:'Corrected, registered stream, ready to use'},
-             ack:{fr:'Configuration où le FPGA porte la charge et où le CPU du porteur n’est pas sollicité.',
-                  en:'Configuration where the FPGA carries the load and the platform CPU is untouched.'}},
+             ack:{fr:'Configuration où le FPGA porte la charge et laisse le CPU du porteur à la fonction système.',
+                  en:'Configuration where the FPGA carries the load and leaves the platform CPU to the system function.'}},
           {v:'meta',t:{fr:'Détections horodatées seules, sans flux vidéo',en:'Time-stamped detections only, no video stream'},
-             ack:{fr:'Débit réduit d’un ordre de grandeur — souvent ce qui débloque la liaison.',
-                  en:'Bandwidth cut by an order of magnitude — often what unblocks the datalink.'}},
+             ack:{fr:'Débit réduit d’un ordre de grandeur : souvent ce qui débloque la liaison.',
+                  en:'Bandwidth cut by an order of magnitude: often what unblocks the datalink.'}},
           {v:'def', t:{fr:'Point encore ouvert',en:'Still an open point'}} ] },
     { id:'dim', br:'archi', q:{fr:'Quelle exigence dimensionne le sous-ensemble ?',en:'Which requirement sizes the sub-system?'},
       o:[ {v:'swap',t:{fr:'Masse, volume et consommation',en:'Mass, volume and power'}},
@@ -531,26 +680,43 @@ const QUAL = {
 /* ============================================================
    CONTACT / SOCIÉTÉ
    ============================================================ */
+/* ---------- pied de page ---------- */
+const FOOT = {
+  cols:[
+    { t:{fr:'SMA-RTY France',en:'SMA-RTY France'},
+      l:[{n:{fr:'La société',en:'The company'}, h:'#contact'},
+         {n:{fr:'Nous écrire',en:'Contact us'},  h:'#cadrer'},
+         {n:{fr:'Équipe',en:'Team'},             h:'#equipe'}] },
+    { t:{fr:'Instruments',en:'Instruments'}, range:true },
+    { t:{fr:'Ressources',en:'Resources'},
+      l:[{n:{fr:'Capacités',en:'Capabilities'},          h:'#capacites'},
+         {n:{fr:'Architecture',en:'Architecture'},        h:'#integration'},
+         {n:{fr:'Journal de laboratoire',en:'Laboratory notebook'}, h:'#labo'}] },
+    { t:{fr:'Mentions',en:'Legal'}, legal:true },
+  ],
+  top:{fr:'Haut de page',en:'Back to top'},
+};
+
 const CONTACT = {
   ey:{fr:'Contact',en:'Contact'},
   h:{fr:'SMA-RTY France SAS',en:'SMA-RTY France SAS'},
   gen:{fr:'Genèse',en:'Origin'},
-  genP:{fr:'SMA-RTY naît des travaux conduits à l’Institut Pascal, unité mixte du CNRS et de l’Université Clermont Auvergne, sur le traitement de l’image au plus près du capteur. La question de départ est restée la même : comment décider à bord, sans renvoyer le flux au sol ni saturer le calculateur du porteur. La société est créée en 2019 et s’installe sur le site même de l’unité, à Aubière. L’entité française porte l’optronique et le calcul embarqué ; l’entité italienne du groupe porte les réseaux et la transmission. La caméra thermique KALIX, issue de ces travaux, a reçu le prix Électrons d’Or 2023 dans la catégorie Électronique industrielle.',
-        en:'SMA-RTY originates from work conducted at Institut Pascal, a joint research unit of CNRS and Université Clermont Auvergne, on processing images as close as possible to the sensor. The founding question has not changed: how to decide on board, without sending the stream to the ground or saturating the platform computer. The company was founded in 2019 and settled on the unit’s own campus in Aubière. The French entity handles optronics and embedded compute; the group’s Italian entity handles networks and transmission. The KALIX thermal camera, born of this work, received the 2023 Électrons d’Or award in the Industrial Electronics category.'},
+  genP:{fr:'SMA-RTY naît des travaux conduits à l’Institut Pascal, unité mixte du CNRS et de l’Université Clermont Auvergne, sur le traitement de l’image au plus près du capteur. La question de départ est restée la même : comment décider à bord, sans renvoyer le flux au sol ni saturer le calculateur du porteur. La société est créée en 2019 et s’installe sur le site même de l’unité, à Aubière. L’entité française porte l’optronique et le calcul embarqué ; l’entité italienne du groupe porte les réseaux et la transmission. La caméra thermique THR-LW, issue de ces travaux, a reçu le prix Électrons d’Or 2023 dans la catégorie Électronique industrielle.',
+        en:'SMA-RTY originates from work conducted at Institut Pascal, a joint research unit of CNRS and Université Clermont Auvergne, on processing images as close as possible to the sensor. The founding question has not changed: how to decide on board, without sending the stream to the ground or saturating the platform computer. The company was founded in 2019 and settled on the unit’s own campus in Aubière. The French entity handles optronics and embedded compute; the group’s Italian entity handles networks and transmission. The THR-LW thermal camera, born of this work, received the 2023 Électrons d’Or award in the Industrial Electronics category.'},
   coords:{fr:'Coordonnées',en:'Contact details'},
   legal:{fr:'Mentions légales',en:'Legal information'},
   eco:{fr:'Écosystème',en:'Ecosystem'},
-  ecoL:{fr:['Institut Pascal — UMR CNRS / Université Clermont Auvergne',
+  ecoL:{fr:['Institut Pascal, UMR CNRS / Université Clermont Auvergne',
             'Clermont Auvergne INP',
             'INESCOP',
             'Projets de recherche financés par l’ANR'],
-        en:['Institut Pascal — CNRS / Université Clermont Auvergne joint unit',
+        en:['Institut Pascal, CNRS / Université Clermont Auvergne joint unit',
             'Clermont Auvergne INP',
             'INESCOP',
             'Research projects funded by the French National Research Agency']},
   grp:{fr:'Groupe',en:'Group'},
   labels:{ adr:{fr:'Adresse',en:'Address'}, tel:{fr:'Téléphone',en:'Telephone'},
-           mail:{fr:'Courriel',en:'Email'}, rs:{fr:'Raison sociale',en:'Legal name'},
+           mail:{fr:'Courriel',en:'Email'}, support:{fr:'Support',en:'Support'}, rs:{fr:'Raison sociale',en:'Legal name'},
            cree:{fr:'Création',en:'Founded'}, siren:{fr:'SIREN',en:'Company number'},
            siret:{fr:'SIRET',en:'Establishment number'}, tva:{fr:'TVA intracommunautaire',en:'VAT number'},
            forme:{fr:'Forme juridique',en:'Legal form'} },
@@ -576,7 +742,7 @@ const UI = {
 
   posEy:{fr:'Périmètre de fourniture',en:'Scope of supply'},
   posH:{fr:'Sous-ensemble optronique et autorité de conception',en:'Optronic sub-system and design authority'},
-  posP:{fr:'SMA-RTY France conçoit et assemble ses instruments à Aubière, sur le site de l’Institut Pascal. La société ne prend pas la maîtrise d’œuvre d’un système : elle fournit la tête optique, la chaîne de traitement et la documentation de définition, de façon que l’intégrateur conserve la maîtrise de son propre système.',
+  posP:{fr:'SMA-RTY France conçoit et assemble ses instruments à Aubière, sur le site de l’Institut Pascal. Elle fournit la tête optique, la chaîne de traitement et la documentation de définition. L’intégrateur garde la maîtrise d’œuvre de son système.',
         en:'SMA-RTY France designs and assembles its instruments in Aubière, on the Institut Pascal campus. The company does not act as system prime contractor: it supplies the optical head, the processing chain and the definition file, so that the integrator retains control of its own system.'},
   posLi:{fr:['Optique et mécanique dessinées en interne, adaptées au porteur',
              'Électronique capteur et carte de traitement conçues en interne',
@@ -592,12 +758,13 @@ const UI = {
   proofP:{fr:'Deux cas où l’image visible et une bande infrarouge unique ne permettent pas de conclure.',
           en:'Two cases where the visible image and a single infrared band do not allow a conclusion.'},
 
-  sigP:{fr:'Cliquez un étage pour le détail de sa conception.',en:'Click a stage for its design detail.'},
+  sigN:{fr:'THR-LW Thermal',en:'THR-LW Thermal'},
+  sigK:{fr:'Vue éclatée',en:'Exploded view'},
 
   stEy:{fr:'Intégration',en:'Integration'},
-  stH:{fr:'Architecture de l’instrument',en:'Instrument architecture'},
-  stP:{fr:'Cinq étages conçus en interne. Chacun est ajustable au besoin du porteur et du système.',
-       en:'Five stages designed in-house. Each is adjustable to the platform and system requirement.'},
+  stH:{fr:'Architecture de l’instrument : THR-LW Thermal',en:'Instrument architecture: THR-LW Thermal'},
+  stP:{fr:'La vue éclatée est celle de la THR-LW Thermal, caméra LWIR de production : objectif, capot, carte capteur, carte de traitement, capot arrière et interfaces. Chaque étage est ajustable au besoin du porteur et du système ; les valeurs citées ci-dessous sont celles publiées au catalogue pour cette caméra.',
+       en:'The exploded view is the THR-LW Thermal, the LWIR production camera: lens, housing, sensor board, processing board, rear cover and interfaces. Each stage is adjustable to the platform and system requirement; the figures quoted below are those published in the catalogue for this camera.'},
   stMod:{fr:'Paramètres ajustables',en:'Adjustable parameters'},
 
   rangeEy:{fr:'Instruments',en:'Instruments'},
@@ -616,11 +783,10 @@ const UI = {
   socP:{fr:'Société par actions simplifiée créée en 2019, implantée sur le site de l’Institut Pascal à Aubière. Travaux conduits avec l’Université Clermont Auvergne, Clermont Auvergne INP et INESCOP, et dans le cadre de projets financés par l’ANR. Entité française du groupe SMA-RTY, dont le second centre de R&D est en Italie.',
         en:'Simplified joint-stock company founded in 2019, located on the Institut Pascal campus in Aubière. Work conducted with Université Clermont Auvergne, Clermont Auvergne INP and INESCOP, and within nationally funded research projects. French entity of the SMA-RTY group, whose second R&D centre is in Italy.'},
 
-  proto:{fr:'Maquette de refonte — prototype non contractuel. Images de prévisualisation, non représentatives de relevés capteur.',
-         en:'Redesign prototype — non-contractual. Previsualization imagery, not representative of sensor captures.'},
-  note:{fr:'Valeurs cibles de conception. Les performances mesurées figurent sur fiche technique.',
-        en:'Design target values. Measured performance is stated on the datasheet.'},
+  proto:{fr:'Maquette de refonte, prototype non contractuel. Images de prévisualisation, non représentatives de relevés capteur.',
+         en:'Redesign prototype, non-contractual. Previsualization imagery, not representative of sensor captures.'},
+
   tbc:{fr:'à confirmer',en:'to confirm'},
 };
 
-module.exports = { site, NAV, POC, PROOF, METRICS, STAGES, RANGE, SECTORS, TRUST, LAB, TEAM, QUAL, CONTACT, UI };
+module.exports = { site, NAV, POC, HEROSEQ, SPECS, CASES, LEGAL, FOOT, PROOF, METRICS, STAGES, RANGE, SECTORS, TRUST, LAB, TEAM, QUAL, CONTACT, UI };
