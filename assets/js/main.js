@@ -1,8 +1,6 @@
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var B = window.__B || {};
-  var L = B.poc || [];
-  var byId = {}; L.forEach(function (p) { byId[p.id] = p; });
 
   /* ================= menu ================= */
   var mb = document.querySelector('[data-menu]'), ov = document.querySelector('[data-overlay]');
@@ -17,61 +15,144 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
   }
 
-  /* ================= hero ================= */
-  var hero = document.querySelector('[data-hero]');
-  if (hero) {
-    var ladder  = hero.querySelector('[data-layers]');
-    var whereEl = hero.querySelector('[data-where]');
-    var metEl   = hero.querySelector('[data-metric]');
-    var gearEl  = hero.querySelector('[data-gear]');
-    var bandEl  = hero.querySelector('[data-bandlabel]');
+  /* ================= hero : bande horizontale =================
+     La hauteur de .hx sert de course : chaque pixel de scroll vertical
+     déplace la bande d'un pixel vers la gauche. On ne détourne aucun
+     événement de molette — le scroll reste natif, donc clavier, trackpad
+     et barre de défilement se comportent normalement. */
+  var hero  = document.querySelector('[data-hero]');
+  var hx    = hero && hero.querySelector('[data-hx]');
+  var track = hero && hero.querySelector('[data-hx-track]');
 
-    function renderLadder(pid) {
-      var p = byId[pid]; if (!p || !ladder) return;
-      ladder.innerHTML = '';
-      p.layers.forEach(function (y) {
-        var b = document.createElement('button');
-        b.type = 'button'; b.setAttribute('data-l', y.id);
-        b.innerHTML = '<b></b><i></i>';
-        b.querySelector('b').textContent = y.n;
-        b.querySelector('i').textContent = y.w || '';
-        if (y.id === p.start) b.className = 'on';
-        b.addEventListener('click', function () { setLayer(pid, y.id); });
-        ladder.appendChild(b);
-      });
+  if (hero && hx && track) {
+    var figs   = Array.prototype.slice.call(track.querySelectorAll('[data-hxp]'));
+    var idxEl  = hero.querySelector('[data-hx-i]');
+    var hud    = hero.querySelector('.hx-hud');
+    var live = false, run = 0, raf = 0, lastI = -1;
+
+    /* L'épinglage est réservé au pointeur fin et au grand écran : sur mobile
+       et en mouvement réduit, le défileur horizontal natif fait le travail. */
+    function pinnable() {
+      return !reduced && window.matchMedia('(min-width:901px)').matches;
     }
-    function setLayer(pid, lid) {
-      var p = byId[pid];
-      var sc = hero.querySelector('.sc[data-scene="' + pid + '"]'); if (!sc) return;
-      Array.prototype.forEach.call(sc.querySelectorAll('.ly'), function (im) {
-        im.classList.toggle('on', im.getAttribute('data-layer') === lid);
+
+    /* En mode épinglé la bande est en overflow:visible — c'est .hx-pin qui rogne,
+       parce que la zone de rognage d'un élément suit sa propre transform.
+       Du coup scrollWidth ne rend plus la largeur du contenu : on la prend
+       sur le dernier panneau. */
+    function contentWidth() {
+      var last = track.lastElementChild;
+      var byChild = last ? last.offsetLeft + last.offsetWidth : 0;
+      /* scrollWidth est juste en défileur natif, la mesure par le dernier
+         panneau l'est en mode épinglé : on garde la plus grande des deux. */
+      return Math.max(track.scrollWidth, byChild);
+    }
+
+    function measure() {
+      var want = pinnable();
+      if (want !== live) {
+        live = want;
+        hero.classList.toggle('hx-live', live);
+        if (!live) { track.style.transform = ''; hx.style.height = ''; }
+      }
+      if (live) {
+        run = Math.max(0, contentWidth() - track.clientWidth);
+        hx.style.height = (run + window.innerHeight) + 'px';
+      }
+      draw();
+    }
+
+    function draw() {
+      raf = 0;
+      var p;
+      if (live) {
+        var total = hx.offsetHeight - window.innerHeight;
+        p = total > 0 ? Math.min(1, Math.max(0, -hx.getBoundingClientRect().top / total)) : 0;
+        track.style.transform = 'translate3d(' + (-p * run).toFixed(1) + 'px,0,0)';
+      } else {
+        /* défileur natif : la même progression se lit sur scrollLeft */
+        var span = contentWidth() - track.clientWidth;
+        p = span > 0 ? track.scrollLeft / span : 0;
+      }
+      if (hud) hud.style.setProperty('--p', p.toFixed(4));
+
+      var vw = window.innerWidth;
+
+      /* compteur : l'image la plus proche du centre */
+      var best = 0, bestD = Infinity;
+      figs.forEach(function (el, i) {
+        var r = el.getBoundingClientRect();
+        var d = Math.abs(r.left + r.width / 2 - vw / 2);
+        if (d < bestD) { bestD = d; best = i; }
       });
-      Array.prototype.forEach.call(ladder.querySelectorAll('button'), function (b) {
-        b.classList.toggle('on', b.getAttribute('data-l') === lid);
-      });
-      if (bandEl && p) {
-        var cur = p.layers.filter(function (y) { return y.id === lid; })[0];
-        if (cur) bandEl.textContent = cur.n + (cur.w ? '  ' + cur.w : '');
+      if (best !== lastI && idxEl) {
+        lastI = best;
+        idxEl.textContent = ('0' + (best + 1)).slice(-2);
       }
     }
-    function setScene(pid) {
-      var p = byId[pid]; if (!p) return;
-      Array.prototype.forEach.call(hero.querySelectorAll('.sc'), function (s) {
-        s.classList.toggle('on', s.getAttribute('data-scene') === pid);
-      });
-      Array.prototype.forEach.call(hero.querySelectorAll('.hb'), function (b) {
-        var on = b.getAttribute('data-poc') === pid;
-        b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      if (whereEl) whereEl.textContent = p.where;
-      if (metEl)   metEl.textContent   = p.metric;
-      if (gearEl)  gearEl.textContent  = p.gear;
-      renderLadder(pid); setLayer(pid, p.start);
+
+    function onScroll() { if (!raf) raf = requestAnimationFrame(draw); }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    track.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', measure);
+    window.addEventListener('orientationchange', measure);
+    /* les images pèsent dans la largeur de la bande : on remesure au chargement */
+    window.addEventListener('load', measure);
+    measure();
+  }
+
+  /* ================= pied de page : dégradé au pointeur ================= */
+  var ft = document.querySelector('[data-ft]');
+  if (ft && !reduced) {
+    var fRaf = 0, fx = 50, fy = 42;
+    function paintFt() {
+      fRaf = 0;
+      ft.style.setProperty('--fx', fx.toFixed(1) + '%');
+      ft.style.setProperty('--fy', fy.toFixed(1) + '%');
     }
-    Array.prototype.forEach.call(hero.querySelectorAll('.hb'), function (b) {
-      b.addEventListener('click', function () { setScene(b.getAttribute('data-poc')); });
+    ft.addEventListener('pointermove', function (e) {
+      var r = ft.getBoundingClientRect();
+      fx = ((e.clientX - r.left) / r.width) * 100;
+      fy = ((e.clientY - r.top) / r.height) * 100;
+      if (!fRaf) fRaf = requestAnimationFrame(paintFt);
+    }, { passive: true });
+    ft.addEventListener('pointerleave', function () {
+      fx = 50; fy = 42;
+      if (!fRaf) fRaf = requestAnimationFrame(paintFt);
     });
-    if (L.length) setScene(L[0].id);
+  }
+
+  /* ================= en-tête effacé au pied de page ================= */
+  if (ft && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) {
+      document.documentElement.classList.toggle('at-ft', es[0].isIntersecting);
+    }, { threshold: 0.04 }).observe(ft);
+  }
+
+  /* ================= curseur : un point ================= */
+  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+    var dot = document.createElement('div');
+    dot.className = 'cur cur--out';
+    dot.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(dot);
+    document.documentElement.classList.add('dotc');
+    var dx = 0, dy = 0, dRaf = 0;
+    function paintDot() {
+      dRaf = 0;
+      dot.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
+    }
+    document.addEventListener('pointermove', function (e) {
+      dx = e.clientX; dy = e.clientY;
+      dot.classList.remove('cur--out');
+      /* le point s'ouvre sur ce qui est cliquable */
+      var t = e.target;
+      var live = t && t.closest && t.closest('a,button,input,select,textarea,summary,[role="tab"],[data-hxp]');
+      dot.classList.toggle('cur--link', !!live);
+      if (!dRaf) dRaf = requestAnimationFrame(paintDot);
+    }, { passive: true });
+    document.addEventListener('pointerleave', function () { dot.classList.add('cur--out'); });
+    document.addEventListener('pointerdown', function () { dot.classList.add('cur--link'); });
   }
 
   /* ================= compteurs ================= */
@@ -138,6 +219,8 @@
         el.classList.toggle('lit', d > .5);
       });
       sig.style.setProperty('--d', d.toFixed(3));
+      /* l'ordre de recouvrement s'inverse dès que la pile s'ouvre */
+      sig.classList.toggle('dep', d > 0.12);
     }
     if (!reduced) {
       window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(renderSig); } }, { passive: true });

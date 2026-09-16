@@ -19,7 +19,8 @@ function logo(id, cls){
     ${LOGO_STOPS.map(([o,c])=>`<stop offset="${o}" stop-color="${c}"/>`).join('')}
   </linearGradient></defs>
   ${LOGO_PATHS.map(d=>`<path class="lg-w" d="${d}"/>`).join('\n  ')}
-  <path class="lg-bar" style="--grad:url(#${g})" d="${LOGO_BAR}"/>
+  <path class="lg-bar" d="${LOGO_BAR}"/>
+  <path class="lg-bar2" style="--grad:url(#${g})" d="${LOGO_BAR}"/>
 </svg>`;
 }
 module.exports = { logo };

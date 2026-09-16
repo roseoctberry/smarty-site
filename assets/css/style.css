@@ -9,7 +9,9 @@
   --spectral:linear-gradient(90deg,var(--g1) 0%,var(--g2) 25%,var(--g3) 50%,var(--g4) 75%,var(--g5) 100%);
   --mesh:radial-gradient(135% 128% at 2% -14%, var(--g1) 0%, var(--g2) 17%, var(--g3) 38%, var(--g4) 60%, var(--g5) 82%, #10275C 100%);
   --sans:europa, 'Avenir Next', Avenir, 'Segoe UI', system-ui, sans-serif;
-  --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Une seule police sur tout le site : Europa. --mono ne désigne plus qu'un
+     usage — petites capitales espacées — et non une autre famille. */
+  --mono:europa, 'Avenir Next', Avenir, 'Segoe UI', system-ui, sans-serif;
   --w:1280px; --pad:clamp(20px,5vw,60px); --lh:1.62; --tr:-.012em; --mlh:1.2; --secp:100px; --gapx:44px; --rad:0px; --bw:1px;
   /* Échelle : 1 / 1.125 / 1.25 / 1.55 / 2.05 — resserrée, hiérarchie par
      graisse et par couleur autant que par taille. */
@@ -40,8 +42,8 @@ a{color:inherit;text-decoration:none}
 /* ===== logo ===== */
 .lg{display:block;height:auto}
 .lg-w,.lg-bar{fill:#fff}
-.lg-bar{transition:fill .4s ease}
-a:hover .lg-bar,a:focus-visible .lg-bar{fill:var(--grad)}
+.lg-bar2{fill:var(--grad);opacity:0;transition:opacity .6s cubic-bezier(.16,1,.3,1)}
+a:hover .lg-bar2,a:focus-visible .lg-bar2{opacity:1}
 
 /* ===== en-tête ===== */
 .hd{position:fixed;top:calc(var(--proto-h,34px) + 12px);left:0;right:0;z-index:60;display:flex;align-items:center;
@@ -83,86 +85,87 @@ a:hover .lg-bar,a:focus-visible .lg-bar{fill:var(--grad)}
   .ovl-d{grid-column:2;margin-top:7px}
 }
 
-/* ===== HERO — fenêtre d'instrument ===== */
-.hero{position:relative;overflow:hidden;padding-top:clamp(120px,15vh,166px);padding-bottom:0;border-bottom:0}
-.hero-grid{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);
-  gap:clamp(28px,4.5vw,66px);align-items:end}
-.hero-txt h1{font-size:var(--s4);line-height:1.18;max-width:20ch;font-weight:300;letter-spacing:-.014em}
-.hero-txt .lede{max-width:48ch;margin-top:1.05rem;font-size:.96rem}
-.hero-act{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-top:1.9rem}
-.lnk{font:400 .66rem/1 var(--mono);letter-spacing:.14em;color:var(--muted);
-  border-bottom:1px solid var(--line-2);padding-bottom:5px}
-.lnk:hover{color:var(--ink);border-color:var(--cyan)}
-.hero-kv{display:grid;grid-template-columns:repeat(3,auto);gap:0 28px;justify-content:start;
-  margin:2.4rem 0 0;padding-top:20px;border-top:1px solid var(--line)}
-.hero-kv dt{font-size:1.12rem;color:var(--ink);font-weight:300;letter-spacing:-.01em}
-.hero-kv dd{margin:5px 0 0;font:400 .625rem/1.45 var(--mono);color:var(--muted);max-width:15ch}
+/* ===== HERO — images plein écran en bande horizontale =====
+   Par défaut : défileur horizontal natif (fonctionne sans JS).
+   .hx-live, posé par main.js, ajoute l'épinglage et la conversion
+   course verticale → translation horizontale. ========================= */
+.hero{position:relative;padding:0;border-bottom:0}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
-/* la capture, encadrée et annotée */
-.hero-fig{margin:0;border:1px solid var(--line-2);background:#000;position:relative}
-.fig-rail{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0;
-  font:400 .6rem/1.5 var(--mono);letter-spacing:.1em;color:var(--muted);
-  padding:10px 14px;background:var(--bg-2)}
-.fig-rail--t{border-bottom:1px solid var(--line-2);text-transform:uppercase;flex-wrap:nowrap;overflow:hidden}
-.fig-rail--t>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.fig-rail--b{border-top:1px solid var(--line-2);display:block;text-transform:none;letter-spacing:0;
-  font-family:var(--sans);font-size:.87rem;line-height:1.55;color:var(--txt);opacity:.85;padding:13px 14px}
-.fig-prev,.fig-band{flex:0 0 auto;overflow:visible;text-overflow:clip}
-.fig-prev{color:var(--sun);border:1px solid rgba(219,231,11,.4);padding:3px 7px;letter-spacing:.16em;font-size:.55rem}
-.fig-band{color:var(--cyan);letter-spacing:.2em;text-transform:none}
-.fig-sp{flex:1}
-.fig-gear{color:var(--faint);flex:0 1 auto}
-.fig-stage{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000}
-.fig-img{position:absolute;inset:0}
-.sc{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .55s ease}
-.sc.on{opacity:1}
-.sc .ly{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease}
-.sc .ly.on{opacity:1}
-.tick{position:absolute;width:16px;height:16px;pointer-events:none;opacity:.65}
-.tick--tl{top:10px;left:10px;border-top:1px solid #fff;border-left:1px solid #fff}
-.tick--tr{top:10px;right:10px;border-top:1px solid #fff;border-right:1px solid #fff}
-.tick--bl{bottom:10px;left:10px;border-bottom:1px solid #fff;border-left:1px solid #fff}
-.tick--br{bottom:10px;right:10px;border-bottom:1px solid #fff;border-right:1px solid #fff}
-/* échelle de bandes verticale */
-.fig-ladder{position:absolute;left:0;top:50%;transform:translateY(-50%);display:grid;gap:1px;
-  background:var(--line-2);border-right:1px solid var(--line-2);border-block:1px solid var(--line-2)}
-.fig-ladder button{display:grid;gap:3px;justify-items:start;background:rgba(8,10,13,.72);border:0;cursor:pointer;
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  color:var(--muted);padding:9px 14px 9px 12px;text-align:left;transition:color .2s,background .2s}
-.fig-ladder b{font:400 .585rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;font-weight:400}
-.fig-ladder i{font-style:normal;font:400 .535rem/1 var(--mono);letter-spacing:.06em;opacity:.62}
-.fig-ladder button:hover{color:var(--ink)}
-.fig-ladder button.on{background:var(--cyan);color:#05191A}
-.fig-ladder button.on i{opacity:.8}
+.hx{position:relative}
+.hx-pin{position:relative;background:#000}
+.hx-track{display:flex;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.hxp{flex:0 0 auto;position:relative;width:100vw;height:82svh;overflow:hidden;
+  background:#000;scroll-snap-align:start}
+.hxl{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 
-.hero-tabs{display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(28px,4vw,54px);
-  border-top:1px solid var(--line-2)}
-.hb{background:none;border:0;border-right:1px solid var(--line);cursor:pointer;text-align:left;
-  padding:16px 18px 18px 0;color:var(--muted);transition:color .2s}
-.hb:last-child{border-right:0}
-.hb:hover,.hb.on{color:var(--ink)}
-.hb.on .hb-k{color:var(--cyan)}
-.hb-k{display:block;font:400 .555rem/1 var(--mono);letter-spacing:.24em;margin-bottom:7px}
-.hb-l{display:block;font-size:.94rem;color:inherit}
-.spectral-rule{display:block;height:2px;background:var(--spectral);margin-top:clamp(22px,3vw,36px)}
-@media(max-width:1040px){
-  .hero-grid{grid-template-columns:minmax(0,1fr);align-items:start;gap:30px}
-  .hero-txt h1{max-width:24ch}
-  .hero-tabs{grid-template-columns:repeat(2,1fr)}
-  .hb{border-bottom:1px solid var(--line);padding-right:14px}
-  .hb:nth-child(2n){border-right:0}
-}
+/* Voiles pleine largeur : en bas pour la légende, en haut pour que l'en-tête
+   fixe reste lisible par-dessus une image claire (fumée, piste enneigée). */
+.hxp::after,.hxp::before{content:"";position:absolute;left:0;right:0;z-index:1;pointer-events:none}
+.hxp::after{bottom:0;height:46%;
+  background:linear-gradient(to top,rgba(4,5,7,.9) 0%,rgba(4,5,7,.45) 42%,transparent 100%)}
+.hxp::before{top:0;height:26%;
+  background:linear-gradient(to bottom,rgba(4,5,7,.72) 0%,rgba(4,5,7,.28) 55%,transparent 100%)}
+.hxp-cap{position:absolute;z-index:2;left:var(--pad);right:var(--pad);
+  bottom:clamp(26px,5vh,54px);display:grid;gap:9px}
+.hxp-hd{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0;
+  font:400 .585rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase}
+.hxp-n{color:var(--sun)}
+.hxp-b{color:var(--cyan)}
+/* la longueur d'onde échappe aux capitales : « µm » deviendrait « MM » */
+.hxp-b u{text-decoration:none;text-transform:none}
+.hxp-k{color:var(--muted)}
+.hxp-t{font-size:var(--s3);font-weight:300;line-height:1.16;max-width:20ch;
+  color:var(--ink);text-shadow:0 2px 24px rgba(0,0,0,.6)}
+.hxp-tel{margin:0;font:400 .585rem/1.5 var(--mono);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint)}
+.hxp-tel i{font-style:normal;margin-left:16px;opacity:.75}
+
+/* --- rail d'état --- */
+.hx-hud{display:flex;align-items:center;gap:16px;background:var(--bg);
+  padding:16px var(--pad);border-top:1px solid var(--line);
+  font:400 .555rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.hx-prev{color:var(--sun);border:1px solid rgba(219,231,11,.4);padding:4px 8px;letter-spacing:.16em}
+.hx-count b{font-weight:400;color:var(--ink)}
+.hx-count,.tbl td,.tbl th,.mt b{font-variant-numeric:tabular-nums}
+.hx-count i{font-style:normal;opacity:.4;margin:0 3px}
+.hx-bar{flex:1;height:1px;background:var(--line-2);position:relative;overflow:hidden}
+.hx-bar i{position:absolute;inset:0 auto 0 0;width:calc(var(--p,0) * 100%);
+  background:var(--spectral);transition:width .15s linear}
+.hx-hint{opacity:.55}
+
+.spectral-rule{display:block;height:2px;background:var(--spectral)}
+
+/* ===== mode épinglé : la molette verticale fait glisser la bande ===== */
+.hero.hx-live .hx-pin{position:sticky;top:0;height:100svh;overflow:hidden;
+  display:grid;grid-template-rows:minmax(0,1fr) auto;
+  /* colonne bornée : sans elle la grille se dimensionne sur le contenu de la
+     bande (4 écrans de large) et il n'y a plus rien à rogner */
+  grid-template-columns:minmax(0,1fr)}
+/* overflow:visible et non hidden : la zone de rognage d'un élément suit sa
+   propre transform. Rogner ici découperait tout ce qui dépasse la première
+   image. C'est .hx-pin, qui ne bouge pas, qui rogne. */
+.hero.hx-live .hx-track{position:relative;overflow:visible;scroll-snap-type:none;
+  width:100%;min-width:0;will-change:transform}
+.hero.hx-live .hxp{height:100%}
+.hero.hx-live .hx-hud{z-index:5}
+/* la première image monte d'un cran à l'ouverture */
+.hero.hx-live .hxp:first-child .hxl{animation:hx-in 1.5s cubic-bezier(.16,1,.3,1) backwards}
+@keyframes hx-in{from{transform:scale(1.07)}}
+
 @media(max-width:680px){
-  .fig-rail--t{flex-wrap:wrap;gap:8px 12px}
-  .fig-rail--t>span{white-space:normal;text-overflow:clip}
-  .fig-gear{display:none}
+  .hxp{height:74svh}
+  .hxp-t{font-size:var(--s2)}
+  .hxp-tel i{display:none}
+  .hx-hint{display:none}
 }
-@media(max-width:560px){
-  .hero-kv{grid-template-columns:1fr 1fr;gap:16px 20px}
-  .fig-ladder button{padding:7px 9px}
-  .hero-tabs{grid-template-columns:1fr}
-  .hb{border-right:0}
+@media(prefers-reduced-motion:reduce){
+  .hero.hx-live .hxp:first-child .hxl{animation:none}
+  .hx-bar i{transition:none}
 }
+
 
 /* ===== bandeau chiffré ===== */
 .band{border-block:1px solid var(--line);background:var(--bg-1);padding-block:clamp(42px,6vw,74px)}
@@ -212,7 +215,13 @@ a:hover .lg-bar,a:focus-visible .lg-bar{fill:var(--grad)}
 .sig-p{margin:0 auto;text-align:center;max-width:64ch;color:#062130;opacity:.86;font-size:.93rem}
 .sig-stage{position:relative;min-height:0;padding-block:18px}
 .sig-stack{position:absolute;inset:0;margin-inline:auto;width:min(720px,88vw)}
-.pc{position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;will-change:transform}
+/* Deux ordres de recouvrement selon l'état.
+   Replié (état embarqué) : la pièce du dessous recouvre celle du dessus,
+   l'objectif passe donc derrière le corps.
+   Déployé : chaque pièce passe devant celle qui est sous elle. */
+.pc{position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;
+  z-index:calc(20 + var(--i,0));will-change:transform}
+.sig.dep .pc{z-index:calc(20 - var(--i,0))}
 .pc img{height:calc(var(--r) * var(--ph,110px));width:auto;max-width:100%;object-fit:contain;
   transform:translateY(-50%);filter:drop-shadow(0 16px 32px rgba(3,16,26,.3))}
 .pc-t{position:absolute;left:50%;top:0;transform:translateY(-50%);
@@ -528,7 +537,105 @@ a:hover .lg-bar,a:focus-visible .lg-bar{fill:var(--grad)}
 .btn:hover{background:var(--cyan);color:#05191A}
 
 /* ===== pied ===== */
-.ft{border-top:1px solid var(--line);padding-block:34px}
-.ft-in{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
-  font:400 .675rem/1.6 var(--mono);color:var(--faint)}
-.ft-mark .lg{width:90px}
+
+/* ===== grandeurs publiées, dans la fiche instrument =====
+   Ajout isolé : aucune règle existante n'est modifiée. Une liste de
+   définitions plutôt qu'un <table>, la carte faisant environ 270 px de large
+   alors que .tbl impose une largeur minimale de 800 px. */
+.in-sp{margin:14px 18px 0;display:grid;border-top:1px solid var(--line)}
+.in-sp>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;
+  align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+.in-sp>div:last-child{border-bottom:0}
+.in-sp dt{margin:0;font:400 .545rem/1.5 var(--mono);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+.in-sp dd{margin:0;color:var(--ink);font-size:.8rem;line-height:1.4;text-align:right}
+.in-sp dd i{font-style:normal;display:block;color:var(--faint);font-size:.715rem;line-height:1.35}
+
+/* ===== légende de la vue éclatée ===== */
+.sig-cap{margin:0 auto;text-align:center;display:grid;gap:7px;
+  padding-top:clamp(26px,4vh,52px);color:#062130}
+.sig-n{font-weight:600;font-size:1.05rem;letter-spacing:-.01em}
+.sig-k{font:400 .62rem/1 var(--mono);letter-spacing:.26em;text-transform:uppercase;opacity:.72}
+.sig-h{font-size:.85rem;opacity:.6}
+
+/* ===== logo : « FRANCE » détaché, plus appuyé ===== */
+.hd-sub{margin-top:11px;font-weight:600;letter-spacing:.62em;text-indent:.62em;color:var(--txt)}
+
+/* ===== lien vers la fiche instrument ===== */
+.in-go{margin:14px 18px 18px;display:inline-block;font:400 .585rem/1 var(--mono);
+  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--line);padding-bottom:5px;transition:color .2s,border-color .2s}
+.in-go:hover{color:var(--ink);border-color:var(--cyan)}
+.ip-fig{aspect-ratio:16/7;margin:clamp(24px,4vw,44px) 0;border:1px solid var(--line)}
+
+/* ===== pied de page ===== */
+.ft{position:relative;overflow:hidden;background:var(--bg-1);border-top:1px solid var(--line);
+  --fx:50%; --fy:42%}
+/* dégradé aux couleurs de la charte, piloté au pointeur */
+.ft-glow{position:absolute;inset:-25% -10%;pointer-events:none;z-index:0;opacity:.72;
+  background:
+    radial-gradient(30% 42% at var(--fx) var(--fy), rgba(219,231,11,.30), transparent 70%),
+    radial-gradient(44% 56% at calc(var(--fx) + 12%) calc(var(--fy) + 10%), rgba(95,189,190,.26), transparent 72%),
+    radial-gradient(60% 72% at calc(var(--fx) - 14%) calc(var(--fy) + 22%), rgba(32,86,174,.30), transparent 76%);
+  filter:blur(46px);transition:background .5s cubic-bezier(.16,1,.3,1)}
+.ft-in{position:relative;z-index:1;max-width:var(--w);margin-inline:auto;padding:clamp(48px,7vw,86px) var(--pad) clamp(26px,3vw,38px)}
+.ft-mark{display:block}
+.ft-mark .lg{width:100%;height:auto}
+.ft-grid{display:grid;grid-template-columns:1.35fr repeat(4,1fr) 1.1fr;gap:clamp(18px,2.4vw,38px);
+  margin-top:clamp(34px,5vw,64px);padding-top:clamp(26px,3vw,40px);border-top:1px solid var(--line)}
+.ft-adr{font-style:normal;color:var(--ink);font-size:1.02rem;line-height:1.55;letter-spacing:-.01em}
+.ft-t{margin:0 0 14px;font:400 .555rem/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.ft-col ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.ft-col a{font:400 .655rem/1.4 var(--mono);letter-spacing:.11em;text-transform:uppercase;
+  color:var(--txt);transition:color .2s}
+.ft-col a:hover{color:var(--cyan)}
+.ft-base{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+  margin-top:clamp(34px,4vw,56px);font:400 .625rem/1.5 var(--mono);letter-spacing:.08em;color:var(--faint)}
+.ft-top{color:var(--muted);transition:color .2s}
+.ft-top:hover{color:var(--ink)}
+@media(max-width:1040px){ .ft-grid{grid-template-columns:repeat(3,1fr)} .ft-adr{grid-column:1/-1} }
+@media(max-width:560px){ .ft-grid{grid-template-columns:repeat(2,1fr)} }
+
+/* ===== curseur : un point à la place de la flèche ===== */
+@media (hover:hover) and (pointer:fine){
+  html.dotc, html.dotc *{cursor:none}
+  .cur{position:fixed;top:0;left:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;
+    background:var(--ink);pointer-events:none;z-index:9999;
+    transition:width .18s ease,height .18s ease,margin .18s ease,background .18s ease,opacity .2s}
+  .cur--link{width:30px;height:30px;margin:-15px 0 0 -15px;background:rgba(95,189,190,.22);
+    box-shadow:inset 0 0 0 1px var(--cyan)}
+  .cur--out{opacity:0}
+}
+
+/* ===== ordre de recouvrement de la vue éclatée =====
+   Chaque pièce passe devant celle qui est sous elle, une exception :
+   l'objectif est recouvert par le capot, et par lui seul. */
+.pc{z-index:calc(20 - var(--i,0))}
+.pc[data-pc="0"]{z-index:19}
+.pc[data-pc="1"]{z-index:20}
+.sig.dep .pc{z-index:calc(20 - var(--i,0))}
+.sig.dep .pc[data-pc="0"]{z-index:19}
+.sig.dep .pc[data-pc="1"]{z-index:20}
+
+/* ===== fiches de la gamme : encadrés jointifs ===== */
+.in-grid{gap:0;border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.in{border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+/* ===== fiche instrument ===== */
+.ip-dl{margin-top:clamp(22px,3vw,36px)}
+.ip-act{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-top:clamp(26px,3vw,40px)}
+
+/* ===== en-tête effacé une fois le pied de page atteint ===== */
+.hd{transition:opacity .35s ease,transform .35s ease}
+html.at-ft .hd{opacity:0;transform:translateY(-14px);pointer-events:none}
+
+/* ===== rail du hero : la ligne seule, de part en part ===== */
+.hx-hud{padding-inline:0;border-top:0;gap:0}
+.hx-bar{width:100%}
+
+/* ===== projets livrés : sous-bloc de la section capacités ===== */
+.cs-ey{margin-top:clamp(52px,6.5vw,92px);padding-top:clamp(26px,3vw,42px);
+  border-top:1px solid var(--line-2)}
+
+/* ===== pied de page : pleine largeur ===== */
+.ft-in{max-width:none}

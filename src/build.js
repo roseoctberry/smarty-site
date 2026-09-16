@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const { logo } = require('./logo.js');
-const { site, NAV, POC, PROOF, METRICS, STAGES, RANGE, SECTORS, TRUST, LAB, TEAM, QUAL, CONTACT, UI } = require('./content.js');
+const { site, NAV, POC, HEROSEQ, SPECS, CASES, LEGAL, FOOT, PROOF, METRICS, STAGES, RANGE, SECTORS, TRUST, LAB, TEAM, QUAL, CONTACT, UI } = require('./content.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const LANGS = ['fr', 'en'];
@@ -15,7 +15,8 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 const A = p => p;
 
 /* ---------- document ---------- */
-function head(l,o){
+function head(l,o,base){
+  base = base || '..';
   const kit = site.typekit
     ? `<link rel="stylesheet" href="https://use.typekit.net/${site.typekit}.css">`
     : '';
@@ -28,10 +29,8 @@ function head(l,o){
 <meta name="description" content="${esc(o.desc)}">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#07080A">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 ${kit}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap">
-<link rel="stylesheet" href="${A('../assets/css/style.css')}">
+<link rel="stylesheet" href="${A(base+'/assets/css/style.css')}">
 </head>`;
 }
 
@@ -62,48 +61,42 @@ function header(l){
 </nav>`;
 }
 
-/* ---------- hero : fenêtre d'instrument, pas plein écran ---------- */
+/* ---------- hero : images plein écran en bande horizontale ----------
+   La course verticale de .hx est convertie en translation horizontale de
+   .hx-track par assets/js/main.js. Sans JS, en mouvement réduit ou sur
+   petit écran, .hx-track reste un défileur horizontal natif. ----------- */
+/* Pas de loading="lazy" sur les images du hero : ce sont des transform, et non
+   le scroll, qui amènent les panneaux à l'écran ; le navigateur ne réévalue pas
+   le différé dans ce cas et les images 3 et 4 restaient vides. */
 function hero(l){
-  const scenes = POC.map((p,i)=>`<figure class="sc${i===0?' on':''}" data-scene="${p.id}">
-      ${p.layers.map(y=>`<img class="ly${y.id===p.start?' on':''}" data-layer="${y.id}" src="${A('../assets/media/poc/'+y.img)}" alt="" loading="${i===0?'eager':'lazy'}">`).join('')}
-    </figure>`).join('');
-  const tabs = POC.map((p,i)=>`<button class="hb${i===0?' on':''}" data-poc="${p.id}" role="tab" aria-selected="${i===0}">
-      <span class="hb-k">${esc(T(p.k,l))}</span><span class="hb-l">${esc(T(p.label,l))}</span></button>`).join('');
+  const frames = HEROSEQ.map(f => {
+    const p = POC.filter(x => x.id === f.poc)[0];
+    const y = p && p.layers.filter(z => z.id === f.layer)[0];
+    return (p && y) ? { p, y } : null;
+  }).filter(Boolean);
+
+  const panels = frames.map(({p, y}, i) => `<article class="hxp" data-hxp data-scene="${p.id}">
+        <img class="hxl" src="${A('../assets/media/poc/'+y.img)}" alt="${esc(T(p.label,l))}, ${esc(T(y.n,l))}"
+             decoding="async" fetchpriority="${i===0?'high':'low'}">
+        <div class="hxp-cap">
+          <p class="hxp-hd"><span class="hxp-b">${esc(T(y.n,l))}${y.w?` <u>${esc(y.w)}</u>`:''}</span>
+            </p>
+          <h2 class="hxp-t">${esc(T(p.label,l))}</h2>
+          <p class="hxp-tel">${esc(T(p.metric,l))}<i>${esc(T(p.gear,l))}</i></p>
+        </div>
+      </article>`).join('\n        ');
+
   return `<section class="hero" data-hero>
-  <div class="wrap hero-grid">
-
-    <div class="hero-txt">
-      <h1>${esc(T(UI.heroH,l))}</h1>
-      <p class="lede">${esc(T(UI.heroP,l))}</p>
-      <div class="hero-act">
-        <a class="btn" href="#cadrer">${esc(T(UI.cta,l))}</a>
-        <a class="lnk" href="#labo">${esc(T(UI.heroLab,l))} →</a>
+  <h1 class="sr-only">${esc(T(UI.heroH,l))}</h1>
+  <div class="hx" data-hx>
+    <div class="hx-pin">
+      <div class="hx-track" data-hx-track>
+        ${panels}
       </div>
-      <dl class="hero-kv">
-        ${METRICS.slice(0,3).map(m=>`<div><dt>${esc(m.pre)}${m.n}${esc(m.suf)}</dt><dd>${esc(T(m.l,l))}</dd></div>`).join('')}
-      </dl>
+
+      <div class="hx-hud" aria-hidden="true"><span class="hx-bar"><i data-hx-bar></i></span></div>
     </div>
-
-    <figure class="hero-fig">
-      <figcaption class="fig-rail fig-rail--t">
-        <span class="fig-prev">${esc(T(UI.heroPrev,l))}</span>
-        <span class="fig-band" data-bandlabel>LWIR</span>
-        <span class="fig-sp"></span>
-        <span data-metric>${esc(T(POC[0].metric,l))}</span>
-        <span class="fig-gear" data-gear>${esc(T(POC[0].gear,l))}</span>
-      </figcaption>
-      <div class="fig-stage">
-        <div class="fig-img">${scenes}</div>
-        <div class="fig-ladder" data-layers role="group" aria-label="${l==='fr'?'Bande affichée':'Displayed band'}"></div>
-        <span class="tick tick--tl" aria-hidden="true"></span><span class="tick tick--tr" aria-hidden="true"></span>
-        <span class="tick tick--bl" aria-hidden="true"></span><span class="tick tick--br" aria-hidden="true"></span>
-      </div>
-      <p class="fig-rail fig-rail--b" data-where>${esc(T(POC[0].where,l))}</p>
-    </figure>
-
   </div>
-  <div class="wrap hero-tabs" role="tablist">${tabs}</div>
-  <span class="spectral-rule" aria-hidden="true"></span>
 </section>`;
 }
 
@@ -150,6 +143,18 @@ function proof(l){
       </div>
       <p class="pf-meta"><span>${esc(T(b.metric,l))}</span><span class="dot">·</span><span>${esc(T(b.gear,l))}</span></p>
     </article>`).join('')}
+
+    <p class="ey cs-ey">${esc(T(CASES.ey,l))}</p>
+    <h3 class="h-md">${esc(T(CASES.h,l))}</h3>
+    ${CASES.items.map(b=>`<article class="pf">
+      <div class="pf-head"><h3>${esc(T(b.h,l))}</h3><p>${esc(T(b.p,l))}</p></div>
+      <div class="pf-cols pf-${b.cols.length}">
+        ${b.cols.map(c=>`<figure>
+          <img src="${A('../assets/media/projets/'+c.img)}" alt="${esc(T(c.n,l))}" loading="lazy">
+          <figcaption>${esc(T(c.n,l))}</figcaption></figure>`).join('')}
+      </div>
+      <p class="pf-meta"><span>${esc(T(b.metric,l))}</span><span class="dot">·</span><span>${esc(T(b.gear,l))}</span></p>
+    </article>`).join('')}
   </div>
 </section>`;
 }
@@ -160,7 +165,7 @@ function signature(l){
   <div class="sig-track"><div class="sig-stick">
     <div class="sig-stage">
       <div class="sig-stack">
-        ${STAGES.map((s,i)=>`<div class="pc" data-pc="${i}" style="--r:${(s.r/438).toFixed(3)}">
+        ${STAGES.map((s,i)=>`<div class="pc" data-pc="${i}" style="--r:${(s.r/438).toFixed(3)};--i:${i}">
            <img src="${A('../assets/media/brand/'+s.img)}" alt="">
            <a class="pc-t" href="#et-${s.id}" data-jump="${s.id}">
              <span class="pc-n">0${i+1}</span><span class="pc-l">${esc(T(s.n,l))}</span><span class="pc-x">→</span>
@@ -168,7 +173,10 @@ function signature(l){
          </div>`).join('')}
       </div>
     </div>
-    <p class="wrap sig-p">${esc(T(UI.sigP,l))}</p>
+    <figcaption class="wrap sig-cap">
+      <b class="sig-n">${esc(T(UI.sigN,l))}</b>
+      <span class="sig-k">${esc(T(UI.sigK,l))}</span>
+    </figcaption>
   </div></div>
 </section>`;
 }
@@ -202,10 +210,10 @@ function stages(l){
 function range(l){
   const c = TL(RANGE.cols,l);
   const steps = l==='fr'
-    ? [['Mise en forme FPGA','Correction, recalage, horodatage — au fil du flux pixel.'],
+    ? [['Mise en forme FPGA','Correction, recalage, horodatage, au fil du flux pixel.'],
        ['Inférence GPU','Détection et suivi à bord, à la cadence capteur.'],
        ['CPU hôte libre','Le processeur du porteur reste à la fonction système.']]
-    : [['FPGA shaping','Correction, registration, time-stamping — on the pixel stream.'],
+    : [['FPGA shaping','Correction, registration, time-stamping, on the pixel stream.'],
        ['GPU inference','Detection and tracking on board, at sensor rate.'],
        ['Host CPU free','The platform processor stays on the system function.']];
   return `<section class="sec sec--soft" id="instruments">
@@ -226,6 +234,7 @@ function range(l){
         <p class="in-h">${esc(T(k.h,l))}</p>
         <p class="in-p">${esc(T(k.p,l))}</p>
         ${k.award?`<p class="in-aw">${esc(T(k.award,l))}</p>`:''}
+        <a class="in-go" href="./instruments/${k.slug}/">${esc(T(RANGE.more,l))} →</a>
       </article>`).join('')}
     </div>
 
@@ -240,6 +249,8 @@ function range(l){
       </table>
     </div>
     <p class="tbl-note">${esc(T(RANGE.note,l))}</p>
+
+
     <h3 class="pipe-h">${esc(T(UI.pipeH,l))}</h3>
     <ol class="pipe">${steps.map(([h,d],i)=>`<li><span class="pipe-n">0${i+1}</span><b>${esc(h)}</b><span>${esc(d)}</span></li>`).join('')}</ol>
   </div>
@@ -319,7 +330,8 @@ function team(l){
         <h3 class="tm-n">${esc(m.n)}</h3>
         <p class="tm-r">${esc(T(m.role,l))}</p>
         <p class="tm-q">${esc(T(m.dom,l))}</p>
-        <a class="tm-li" href="${m.li || '#'}"${m.li?' target="_blank" rel="noopener"':''}>${esc(T(L.li,l))} →</a>
+        ${m.rg?`<div><a class="tm-li" href="${m.rg}" target="_blank" rel="noopener">${esc(T(L.pub,l))} →</a></div>`:''}
+        <div><a class="tm-li" href="${m.li || '#'}"${m.li?' target="_blank" rel="noopener"':''}>${esc(T(L.li,l))} →</a></div>
       </article>`).join('')}
     </div>
     <p class="tm-src">${esc(T(TEAM.src,l))}</p>
@@ -339,7 +351,7 @@ function lab(l){
     <div class="lab-grid">
       ${LAB.entries.map(e=>`<article class="lv" data-band="${e.bandv}">
         <a class="lv-fig" href="${e.url || '#labo'}"${e.url?' target="_blank" rel="noopener"':''}
-           aria-label="${esc(T(LAB.play,l))} — ${esc(T(e.t,l))}">
+           aria-label="${esc(T(LAB.play,l))} : ${esc(T(e.t,l))}">
           <img src="${A('../assets/media/poc/'+e.thumb)}" alt="" loading="lazy">
           <span class="lv-play" aria-hidden="true"></span>
           <span class="lv-dur">${esc(e.dur)}</span>
@@ -399,6 +411,7 @@ function company(l){
           <div><dt>${esc(T(K.adr,l))}</dt><dd>${site.adresse.map(x=>esc(x)).join('<br>')}</dd></div>
           <div><dt>${esc(T(K.tel,l))}</dt><dd>${tel}</dd></div>
           <div><dt>${esc(T(K.mail,l))}</dt><dd><a href="mailto:${site.mail}">${esc(site.mail)}</a></dd></div>
+          <div><dt>${esc(T(K.support,l))}</dt><dd><a href="mailto:${site.support}">${esc(site.support)}</a></dd></div>
         </dl>
         <h3 class="ct-t">${esc(T(C.legal,l))}</h3>
         <dl class="ct-dl">
@@ -409,6 +422,7 @@ function company(l){
           <div><dt>${esc(T(K.siret,l))}</dt><dd>${esc(site.siret)}</dd></div>
           <div><dt>${esc(T(K.tva,l))}</dt><dd>${esc(site.tva)}</dd></div>
         </dl>
+        <p><a class="lnk" href="./${T(LEGAL.privacy.slug,l)}/">${esc(T(LEGAL.privacy.h,l))} →</a></p>
       </div>
 
       <div class="ct-col ct-col--w">
@@ -436,17 +450,142 @@ function qualifier(l){
     <div class="qual-body" data-qual-body></div>
     <ul class="qual-recap" data-qual-recap aria-live="polite"></ul>
   </div>
+</section>`;
+}
+
+/* ---------- pied de page ----------
+   `base` : chemin vers la racine du site depuis la page rendue.
+   Le dégradé suit le pointeur, cf. assets/js/main.js. */
+function footer(l, base){
+  const root = `${base}/${l}/`;
+  const cols = FOOT.cols.map(c=>{
+    let links;
+    if (c.range)      links = RANGE.cards.map(k=>({n:T(k.n,l), h:`${root}instruments/${k.slug}/`}));
+    else if (c.legal) links = Object.keys(LEGAL).map(k=>({n:T(LEGAL[k].h,l), h:`${root}${T(LEGAL[k].slug,l)}/`}));
+    else              links = c.l.map(x=>({n:T(x.n,l), h:`${root}${x.h}`}));
+    return `<div class="ft-col">
+      <p class="ft-t">${esc(T(c.t,l))}</p>
+      <ul>${links.map(x=>`<li><a href="${x.h}">${esc(x.n)}</a></li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+  return `<footer class="ft" data-ft>
+  <span class="ft-glow" aria-hidden="true"></span>
+  <div class="ft-in">
+    <a class="ft-mark" href="${root}" aria-label="SMARTY France">${logo('ft')}</a>
+    <div class="ft-grid">
+      <address class="ft-adr">${site.adresse.map(x=>esc(x)).join('<br>')}</address>
+      ${cols}
+      <div class="ft-col ft-mail">
+        <p class="ft-t">${esc(T(CONTACT.labels.mail,l))}</p>
+        <ul>
+          <li><a href="mailto:${site.mail}">${esc(site.mail)}</a></li>
+          <li><a href="mailto:${site.support}">${esc(site.support)}</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-base">
+      <span>© <span data-year>2026</span> SMA-RTY SAS · SIREN ${esc(site.siren)}</span>
+      <a class="ft-top" href="#">${esc(T(FOOT.top,l))} ↑</a>
+    </div>
+  </div>
+</footer>`;
+}
+
+/* ---------- en-tête des sous-pages ---------- */
+function subHeader(l, base, altHref){
+  const alt = l==='fr' ? 'en' : 'fr';
+  return `<header class="hd">
+  <a class="hd-lang" href="${altHref}">${alt.toUpperCase()}</a>
+  <a class="hd-mark" href="${base}/${l}/" aria-label="SMARTY France">
+    ${logo('hd')}<span class="hd-sub">${site.sub}</span>
+  </a>
+  <a class="hd-cta" href="${base}/${l}/#cadrer">${esc(T(UI.cta,l))}</a>
+</header>`;
+}
+
+/* ---------- fiche instrument ---------- */
+function instrumentPage(l, k){
+  const alt  = l==='fr' ? 'en' : 'fr';
+  const unit = SPECS.units.filter(x => x.id === k.spec)[0];
+  const sc   = TL(SPECS.cols,l);
+  /* cartes et lignes du tableau sont dans le même ordre */
+  const row  = RANGE.rows[RANGE.cards.indexOf(k)];
+  const cols = TL(RANGE.cols,l);
+  return `${head(l,{title:T(k.n,l)+' · SMA-RTY France', desc:T(k.h,l)},'../../..')}
+<body>
+${subHeader(l,'../../..', `../../../${alt}/instruments/${k.slug}/`)}
+<main>
+<section class="sec">
+  <div class="wrap">
+    <p class="ey">${esc(T(k.b,l))}</p>
+    <h1 class="h-lg">${esc(T(k.n,l))}</h1>
+    <p class="lede">${esc(T(k.h,l))}</p>
+    <figure class="in-fig ip-fig">
+      <img src="${A('../../../assets/media/instruments/'+k.img)}" alt="${esc(T(k.n,l))}" decoding="async">
+    </figure>
+    <p class="para">${esc(T(k.p,l))}</p>
+    ${k.award?`<p class="in-aw">${esc(T(k.award,l))}</p>`:''}
+    ${row?`<dl class="ct-dl ip-dl">
+      <div><dt>${esc(cols[2])}</dt><dd>${esc(T(row.f,l))}</dd></div>
+      <div><dt>${esc(cols[3])}</dt><dd>${esc(T(row.o,l))}</dd></div>
+      <div><dt>${esc(cols[4])}</dt><dd>${esc(T(row.s,l))}</dd></div>
+    </dl>`:''}
+    ${unit?`<h2 class="tbl-h">${esc(T(SPECS.h,l))}</h2>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>${sc.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+        <tbody>${unit.rows.map(r=>`<tr>
+          <td class="tbl-k">${esc(T(r.k,l))}</td>
+          <td>${esc(T(r.v,l))}${r.c?` <span class="tbl-s">· ${esc(T(r.c,l))}</span>`:''}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <p class="tbl-note">${esc(T(SPECS.p,l))}</p>`:''}
+    <p class="ip-act">
+      <a class="btn" href="../../../${l}/#cadrer">${esc(T(UI.cta,l))}</a>
+      <a class="lnk" href="../../../${l}/#instruments">${esc(T(RANGE.back,l))} →</a>
+    </p>
+  </div>
 </section>
-<footer class="ft"><div class="wrap ft-in">
-  <a class="ft-mark" href="./">${logo('ft')}</a>
-  <span>© <span data-year>2026</span> SMA-RTY SAS · SIREN ${site.siren} · ${esc(T(site.lieu,l))}</span>
-</div></footer>`;
+</main>
+${footer(l,'../../..')}
+<script src="${A('../../../assets/js/main.js')}" defer></script>
+</body></html>`;
+}
+
+/* ---------- page légale autonome ---------- */
+function legalPage(l, doc){
+  const alt = l==='fr' ? 'en' : 'fr';
+  const back = l==='fr' ? 'Retour au site' : 'Back to site';
+  return `${head(l,{title:T(doc.h,l)+' · SMA-RTY France', desc:T(doc.intro,l)},'../..')}
+<body>
+${subHeader(l,'../..', `../../${alt}/${T(doc.slug,alt)}/`)}
+<main>
+<section class="sec">
+  <div class="wrap">
+    <p class="ey">${esc(T(doc.ey,l))}</p>
+    <h1 class="h-lg">${esc(T(doc.h,l))}</h1>
+    <p class="lede">${esc(T(doc.intro,l))}</p>
+    ${doc.sections.map(sec=>`<h2 class="h-md">${esc(T(sec.h,l))}</h2>
+    ${sec.p.map(par=>`<p class="para">${esc(T(par,l))}</p>`).join('')}`).join('')}
+    <dl class="ct-dl">
+      <div><dt>${esc(T(CONTACT.labels.mail,l))}</dt><dd><a href="mailto:${site.mail}">${esc(site.mail)}</a></dd></div>
+      <div><dt>${esc(T(CONTACT.labels.support,l))}</dt><dd><a href="mailto:${site.support}">${esc(site.support)}</a></dd></div>
+    </dl>
+    <p class="tbl-note">${esc(T(doc.updated,l))}</p>
+    <p><a class="lnk" href="../../${l}/">${esc(back)} →</a></p>
+  </div>
+</section>
+</main>
+${footer(l,'../..')}
+<script src="${A('../../assets/js/main.js')}" defer></script>
+</body></html>`;
 }
 
 function page(l){
   const o = { title: l==='fr'
-      ? 'SMA-RTY France — Caméras multispectrales et calcul embarqué'
-      : 'SMA-RTY France — Multispectral cameras and embedded compute',
+      ? 'SMA-RTY France · Caméras multispectrales et calcul embarqué'
+      : 'SMA-RTY France · Multispectral cameras and embedded compute',
     desc: T(UI.heroP,l) };
   const boot = {
     lang:l,
@@ -481,6 +620,7 @@ ${lab(l)}
 ${company(l)}
 ${qualifier(l)}
 </main>
+${footer(l,'..')}
 <script>window.__B=${JSON.stringify(boot)};</script>
 <script src="${A('../assets/js/main.js')}" defer></script>
 <script src="${A('../assets/js/da.js')}" defer></script>
@@ -491,6 +631,19 @@ LANGS.forEach(l=>{
   const dir = path.join(ROOT,l);
   fs.mkdirSync(dir,{recursive:true});
   fs.writeFileSync(path.join(dir,'index.html'), page(l));
+  /* pages légales : une seule pour l'instant, la confidentialité.
+     Conditions de vente et mentions légales : rien à importer (cf. import-inventaire.md). */
+  RANGE.cards.forEach(k=>{
+    const sub = path.join(dir,'instruments',k.slug);
+    fs.mkdirSync(sub,{recursive:true});
+    fs.writeFileSync(path.join(sub,'index.html'), instrumentPage(l,k));
+  });
+  Object.keys(LEGAL).forEach(k=>{
+    const doc = LEGAL[k];
+    const sub = path.join(dir, T(doc.slug,l));
+    fs.mkdirSync(sub,{recursive:true});
+    fs.writeFileSync(path.join(sub,'index.html'), legalPage(l,doc));
+  });
 });
 fs.writeFileSync(path.join(ROOT,'index.html'),
   `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./fr/"><a href="./fr/">SMA-RTY</a>`);
