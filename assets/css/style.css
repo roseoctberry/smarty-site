@@ -639,3 +639,6 @@ html.at-ft .hd{opacity:0;transform:translateY(-14px);pointer-events:none}
 
 /* ===== pied de page : pleine largeur ===== */
 .ft-in{max-width:none}
+
+/* ===== pied de page : occupe l'écran une fois en bas ===== */
+.ft{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end}

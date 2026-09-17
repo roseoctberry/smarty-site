@@ -109,7 +109,6 @@ function band(l){
       <span class="mt-l">${esc(T(m.l,l))}</span><span class="mt-s">${esc(T(m.s,l))}</span>
     </div>`).join('')}
   </div>
-  <p class="wrap band-note">${esc(T(UI.note,l))}</p>
 </section>`;
 }
 
@@ -334,7 +333,6 @@ function team(l){
         <div><a class="tm-li" href="${m.li || '#'}"${m.li?' target="_blank" rel="noopener"':''}>${esc(T(L.li,l))} →</a></div>
       </article>`).join('')}
     </div>
-    <p class="tm-src">${esc(T(TEAM.src,l))}</p>
   </div>
 </section>`;
 }
